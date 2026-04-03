@@ -28,7 +28,7 @@ function InfoRow({ icon, label, value, styles, colors, arRegular, arBold }) {
   );
 }
 
-export default function ProfileScreen({ onBack, preferences }) {
+export default function ProfileScreen({ onNavigate, onBack, preferences, onUpdatePreferences }) {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(width), [width]);
   const { t, language } = useI18n();
@@ -53,30 +53,46 @@ export default function ProfileScreen({ onBack, preferences }) {
         : fallbackValue;
   const accountMode = isGuest ? t('profile.modeGuest') : t('profile.modeAccount');
 
+  const handleLogout = async () => {
+    if (onUpdatePreferences) {
+      await onUpdatePreferences({
+        account: { ...preferences?.account, mode: 'skip', token: '', user: null },
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <LinearGradient
-        colors={isDark ? ['#14213d', '#1d4ed8', '#0f766e'] : ['#0f6dff', '#0d6efd', '#22b8cf']}
-        style={styles.topHero}
-      >
-        <View style={styles.topRow}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-            <Ionicons name="arrow-back" size={22} color="#fff" />
+      <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.topBar}>
+          <TouchableOpacity 
+            style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
+            onPress={onBack}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={[styles.topTitle, arBold]}>{t('profile.title')}</Text>
-          <View style={styles.backBtn} />
-        </View>
-
-        <View style={styles.avatarWrap}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="person" size={46} color="#ffffff" />
+          <View style={styles.topTitleWrap}>
+            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{t('profile.title')}</Text>
           </View>
-          <Text style={[styles.nameText, arBold]}>{displayName}</Text>
-          <Text style={[styles.modeText, arRegular]}>{accountMode}</Text>
+          <View style={styles.placeholderBtn} />
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <LinearGradient
+          colors={isDark ? ['#14213d', '#1d4ed8'] : ['#0a2540', '#0066ff']}
+          style={styles.profileHero}
+        >
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatarCircle}>
+              <Ionicons name="person" size={46} color="#ffffff" />
+            </View>
+            <Text style={[styles.nameText, arBold]}>{displayName}</Text>
+            <Text style={[styles.modeText, arRegular]}>{accountMode}</Text>
+          </View>
+        </LinearGradient>
+
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('profile.personalInfo')}</Text>
           <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('profile.personalInfoSub')}</Text>
@@ -109,6 +125,35 @@ export default function ProfileScreen({ onBack, preferences }) {
             arBold={arBold}
           />
         </View>
+
+        {isGuest ? (
+          <View style={[styles.card, { marginTop: styles.s16 || 16, backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('profile.authRequiredTitle') || 'Connexion'}</Text>
+            <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('profile.authRequiredSub') || 'Connectez-vous pour voir votre profil'}</Text>
+            
+            <TouchableOpacity 
+              style={[styles.primaryBtn, { backgroundColor: colors.primary }]} 
+              onPress={() => onNavigate('login')}
+            >
+              <Text style={[styles.primaryBtnText, arBold]}>{t('onboarding.signIn')}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.secondaryBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+              onPress={() => onNavigate('signup')}
+            >
+              <Text style={[styles.secondaryBtnText, arRegular, { color: colors.textPrimary }]}>{t('onboarding.signUp')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.logoutBtn, { borderColor: '#ef4444' }]} 
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#ef4444" style={{ marginRight: 8 }} />
+            <Text style={[styles.logoutText, arBold]}>Déconnexion</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,32 +163,72 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
-    topHero: {
-      borderBottomLeftRadius: s(34, 28, 44),
-      borderBottomRightRadius: s(34, 28, 44),
-      paddingTop: s(12, 10, 16),
-      paddingHorizontal: s(16, 14, 22),
-      paddingBottom: s(22, 18, 28),
+    headerCard: {
+      backgroundColor: '#ffffff',
+      borderRadius: s(24, 20, 28),
+      borderWidth: 1,
+      borderColor: '#e2e8f0',
+      paddingHorizontal: s(16, 14, 20),
+      paddingVertical: s(14, 12, 18),
+      marginHorizontal: s(16, 14, 20),
+      marginTop: s(12, 10, 16),
+      marginBottom: s(6, 4, 8),
+      shadowColor: '#0f172a',
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 4,
     },
-    topRow: {
+    topBar: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 50),
-      height: s(44, 38, 50),
-      borderRadius: s(14, 12, 18),
+      width: s(44, 38, 48),
+      height: s(44, 38, 48),
+      borderRadius: 999,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(255,255,255,0.2)',
+      backgroundColor: '#f1f5f9',
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.52)',
+      borderColor: '#e2e8f0',
+      shadowColor: '#0f172a',
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+    },
+    topTitleWrap: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: s(8, 6, 12),
     },
     topTitle: {
-      color: '#fff',
-      fontSize: s(24, 20, 30),
+      color: '#0a2540',
+      fontSize: s(17, 15, 20),
       fontWeight: '900',
+      textAlign: 'center',
+      letterSpacing: -0.3,
+    },
+    placeholderBtn: {
+      width: s(44, 38, 48),
+      height: s(44, 38, 48),
+    },
+    profileHero: {
+      borderRadius: s(24, 20, 28),
+      paddingVertical: s(24, 20, 30),
+      paddingHorizontal: s(16, 14, 22),
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: s(14, 12, 18),
+      shadowColor: '#0a2540',
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 4,
     },
     avatarWrap: {
       marginTop: s(18, 14, 24),
@@ -220,5 +305,34 @@ const createStyles = (width) => {
       fontSize: s(16, 14, 20),
       fontWeight: '800',
     },
+    s16: s(16, 14, 20),
+    primaryBtn: {
+      height: s(50, 44, 58),
+      borderRadius: s(14, 12, 18),
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: s(10, 8, 14),
+    },
+    primaryBtnText: { color: '#fff', fontSize: s(16, 14, 18), fontWeight: '800' },
+    secondaryBtn: {
+      height: s(50, 44, 58),
+      borderRadius: s(14, 12, 18),
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: s(10, 8, 14),
+    },
+    secondaryBtnText: { fontSize: s(16, 14, 18), fontWeight: '700' },
+    logoutBtn: {
+      flexDirection: 'row',
+      height: s(54, 48, 62),
+      borderRadius: s(16, 14, 20),
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: s(24, 20, 30),
+      backgroundColor: '#fef2f2',
+    },
+    logoutText: { color: '#ef4444', fontSize: s(16, 14, 18), fontWeight: '800' },
   });
 };

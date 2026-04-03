@@ -1,66 +1,182 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Linking, Modal, Pressable, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+﻿import { useMemo, useState, useEffect } from 'react';
+import { Image, Linking, SafeAreaView, ScrollView, Text, TouchableOpacity, View, useWindowDimensions, TextInput, SectionList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+import { LinearGradient } from 'expo-linear-gradient';
 import TopToast from '../components/TopToast';
 import { createScaler } from '../utils/responsive';
 import { createAmbulanceStyles } from '../styles/ambulanceStyles';
-import { createAmbulanceRequest } from '../services/api';
-import { submitRequestWithFormSubmit } from '../services/requestDelivery';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 
-const emptyForm = {
-  transferMode: 'same_city',
-  fromLocation: 'casablanca',
-  toLocation: 'casablanca',
-  interventionType: 'urgent',
-  name: '',
-  phone: '',
-  address: '',
-  notes: '',
+const DEFAULT_PHONE = '+212539941027';
+const DEFAULT_WHATSAPP = '+212660884440';
+const WEBSITE_URL = 'https://www.cmpf.ma';
+
+// Use Arabic as the internal key for contact mapping
+const CITY_CONTACTS = {
+  'أكادير': { call: '+212 5 28 84 06 26', whatsapp: '+212 6 62 02 82 49' },
+  'الدار البيضاء': { call: '+212 5 22 49 16 16', whatsapp: '+212 6 61 50 27 63' },
+  'فاس': { call: '+212535520914', whatsapp: '+212614564507' },
+  'العيون': { call: '+212 5 28 99 76 01', whatsapp: '06 78 98 90 04' },
+  'مراكش': { call: '+212 5 24 44 84 51', whatsapp: '+212 6 62 01 81 98' },
+  'مكناس': { call: '+212535520914', whatsapp: '+212614564507' },
+  'الناظور': { call: '+212 5 36 32 08 77', whatsapp: '+212677299084' },
+  'ورزازات': { call: '+212 5 24 88 56 67', whatsapp: '+212 6 61 85 65 13' },
+  'وجدة': { call: '+212 5 36 70 30 25', whatsapp: '+212 6 61 08 84 13' },
+  'الرباط': { call: '+212 5 37 70 60 17', whatsapp: '+212700995153' },
+  'طنجة': { call: '+212 5 39 94 10 27', whatsapp: '+212 6 60 88 44 40' },
+  'تطوان': { call: '+212 5 39 97 40 88', whatsapp: '+212 6 62 02 21 08' },
 };
 
-const CITY_OPTIONS = [
-  { id: 'agadir', fr: 'Agadir', en: 'Agadir', ar: 'أكادير' },
-  { id: 'casablanca', fr: 'Casablanca', en: 'Casablanca', ar: 'الدار البيضاء' },
-  { id: 'fes', fr: 'Fes', en: 'Fez', ar: 'فاس' },
-  { id: 'laayoune', fr: 'Laayoune', en: 'Laayoune', ar: 'العيون' },
-  { id: 'marrakech', fr: 'Marrakech', en: 'Marrakech', ar: 'مراكش' },
-  { id: 'meknes', fr: 'Meknes', en: 'Meknes', ar: 'مكناس' },
-  { id: 'nador', fr: 'Nador', en: 'Nador', ar: 'الناظور' },
-  { id: 'ouarzazate', fr: 'Ouarzazate', en: 'Ouarzazate', ar: 'ورزازات' },
-  { id: 'oujda', fr: 'Oujda', en: 'Oujda', ar: 'وجدة' },
-  { id: 'rabat', fr: 'Rabat', en: 'Rabat', ar: 'الرباط' },
-  { id: 'tanger', fr: 'Tanger', en: 'Tangier', ar: 'طنجة' },
-  { id: 'tetouan', fr: 'Tetouan', en: 'Tetouan', ar: 'تطوان' },
+const MOROCCO_REGIONS = [
+  {
+    ar: '1. طنجة - تطوان - الحسيمة',
+    fr: '1. Tanger - Tétouan - Al Hoceima',
+    cities: [
+      { ar: 'طنجة', fr: 'Tanger' },
+      { ar: 'تطوان', fr: 'Tétouan' },
+      { ar: 'الحسيمة', fr: 'Al Hoceima' },
+      { ar: 'العرائش', fr: 'Larache' },
+      { ar: 'القصر الكبير', fr: 'Ksar El Kebir' },
+      { ar: 'شفشاون', fr: 'Chefchaouen' },
+      { ar: 'وزان', fr: 'Ouezzane' },
+      { ar: 'أصيلة', fr: 'Assilah' },
+      { ar: 'الفنيدق', fr: 'Fnideq' },
+      { ar: 'مرتيل', fr: 'Martil' },
+    ],
+  },
+  {
+    ar: '2. الشرق',
+    fr: '2. Oriental',
+    cities: [
+      { ar: 'وجدة', fr: 'Oujda' },
+      { ar: 'الناظور', fr: 'Nador' },
+      { ar: 'بركان', fr: 'Berkane' },
+      { ar: 'تاوريرت', fr: 'Taourirt' },
+      { ar: 'جرادة', fr: 'Jerada' },
+      { ar: 'فجيج', fr: 'Figuig' },
+      { ar: 'أحفير', fr: 'Ahfir' },
+      { ar: 'زايو', fr: 'Zaïo' },
+      { ar: 'السعيدية', fr: 'Saïdia' },
+    ],
+  },
+  {
+    ar: '3. فاس - مكناس',
+    fr: '3. Fès - Meknès',
+    cities: [
+      { ar: 'فاس', fr: 'Fès' },
+      { ar: 'مكناس', fr: 'Meknès' },
+      { ar: 'تازة', fr: 'Taza' },
+      { ar: 'إفران', fr: 'Ifrane' },
+      { ar: 'آزرو', fr: 'Azrou' },
+      { ar: 'صفرو', fr: 'Sefrou' },
+      { ar: 'بولمان', fr: 'Boulemane' },
+      { ar: 'الحاجب', fr: 'El Hajeb' },
+    ],
+  },
+  {
+    ar: '4. الرباط - سلا - القنيطرة',
+    fr: '4. Rabat - Salé - Kénitra',
+    cities: [
+      { ar: 'الرباط', fr: 'Rabat' },
+      { ar: 'سلا', fr: 'Salé' },
+      { ar: 'القنيطرة', fr: 'Kénitra' },
+      { ar: 'تمارة', fr: 'Témara' },
+      { ar: 'الصخيرات', fr: 'Skhirat' },
+      { ar: 'سيدي قاسم', fr: 'Sidi Kacem' },
+      { ar: 'سيدي سليمان', fr: 'Sidi Slimane' },
+    ],
+  },
+  {
+    ar: '5. بني ملال - خنيفرة',
+    fr: '5. Béni Mellal - Khénifra',
+    cities: [
+      { ar: 'بني ملال', fr: 'Béni Mellal' },
+      { ar: 'خنيفرة', fr: 'Khénifra' },
+      { ar: 'أزيلال', fr: 'Azilal' },
+      { ar: 'الفقيه بن صالح', fr: 'Fquih Ben Salah' },
+    ],
+  },
+  {
+    ar: '6. الدار البيضاء - سطات',
+    fr: '6. Casablanca - Settat',
+    cities: [
+      { ar: 'الدار البيضاء', fr: 'Casablanca' },
+      { ar: 'المحمدية', fr: 'Mohammedia' },
+      { ar: 'الجديدة', fr: 'El Jadida' },
+      { ar: 'سطات', fr: 'Settat' },
+      { ar: 'برشيد', fr: 'Berrechid' },
+      { ar: 'بنسليمان', fr: 'Benslimane' },
+      { ar: 'سيدي بنور', fr: 'Sidi Bennour' },
+    ],
+  },
+  {
+    ar: '7. مراكش - آسفي',
+    fr: '7. Marrakech - Safi',
+    cities: [
+      { ar: 'مراكش', fr: 'Marrakech' },
+      { ar: 'آسفي', fr: 'Safi' },
+      { ar: 'الصويرة', fr: 'Essaouira' },
+      { ar: 'قلعة السراغنة', fr: 'El Kelaâ de Sraghna' },
+      { ar: 'الرحامنة', fr: 'Rehamna' },
+      { ar: 'شيشاوة', fr: 'Chichaoua' },
+      { ar: 'اليوسفية', fr: 'Youssoufia' },
+    ],
+  },
+  {
+    ar: '8. درعة - تافيلالت',
+    fr: '8. Drâa - Tafilalet',
+    cities: [
+      { ar: 'الرشيدية', fr: 'Errachidia' },
+      { ar: 'ورزازات', fr: 'Ouarzazate' },
+      { ar: 'زاكورة', fr: 'Zagora' },
+      { ar: 'تنغير', fr: 'Tinghir' },
+      { ar: 'ميدلت', fr: 'Midelt' },
+      { ar: 'الريصاني', fr: 'Rissani' },
+    ],
+  },
+  {
+    ar: '9. سوس - ماسة',
+    fr: '9. Souss - Massa',
+    cities: [
+      { ar: 'أكادير', fr: 'Agadir' },
+      { ar: 'إنزكان', fr: 'Inezgane' },
+      { ar: 'تارودانت', fr: 'Taroudant' },
+      { ar: 'تيزنيت', fr: 'Tiznit' },
+      { ar: 'شتوكة آيت باها', fr: 'Biougra' },
+    ],
+  },
+  {
+    ar: '10. كلميم - واد نون',
+    fr: '10. Guelmim - Oued Noun',
+    cities: [
+      { ar: 'كلميم', fr: 'Guelmim' },
+      { ar: 'سيدي إفني', fr: 'Sidi Ifni' },
+      { ar: 'طانطان', fr: 'Tan-Tan' },
+      { ar: 'أسا الزاك', fr: 'Assa-Zag' },
+    ],
+  },
+  {
+    ar: '11. العيون - الساقية الحمراء',
+    fr: '11. Laâyoune - Sakia El Hamra',
+    cities: [
+      { ar: 'العيون', fr: 'Laâyoune' },
+      { ar: 'السمارة', fr: 'Es-Semara' },
+      { ar: 'طرفاية', fr: 'Tarfaya' },
+      { ar: 'بوجدور', fr: 'Boujdour' },
+    ],
+  },
+  {
+    ar: '12. الداخلة - وادي الذهب',
+    fr: '12. Dakhla - Oued Ed Dahab',
+    cities: [
+      { ar: 'الداخلة', fr: 'Dakhla' },
+      { ar: 'أوسرد', fr: 'Aousserd' },
+    ],
+  },
 ];
 
-const CITY_COORDS = {
-  agadir: [30.4278, -9.5981],
-  casablanca: [33.5731, -7.5898],
-  fes: [34.0331, -5.0003],
-  laayoune: [27.1536, -13.2033],
-  marrakech: [31.6295, -7.9811],
-  meknes: [33.8935, -5.5473],
-  nador: [35.1681, -2.9287],
-  ouarzazate: [30.9335, -6.9370],
-  oujda: [34.6814, -1.9086],
-  rabat: [34.0209, -6.8416],
-  tanger: [35.7595, -5.834],
-  tetouan: [35.5889, -5.3626],
-};
-
-const typeOptions = [
-  { id: 'urgent', icon: 'flash', color: '#ff4a4a' },
-  { id: 'medical', icon: 'medical', color: '#2f80ff' },
-  { id: 'transport', icon: 'car-sport', color: '#f59e0b' },
-];
-
-const TOTAL_STEPS = 4;
-const SUPPORT_PHONE = '+212612345678';
-
-export default function AmbulanceScreen({ onBack, preferences }) {
+export default function AmbulanceScreen({ onBack, onNavigate, preferences }) {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createAmbulanceStyles(width), [width]);
   const s = useMemo(() => createScaler(width), [width]);
@@ -68,161 +184,40 @@ export default function AmbulanceScreen({ onBack, preferences }) {
   const { language } = useI18n();
   const isDark = mode === 'dark';
   const isArabic = language === 'ar';
-  const arRegular = isArabic ? { fontFamily: 'Cairo_400Regular' } : null;
-  const arBold = isArabic ? { fontFamily: 'Cairo_700Bold' } : null;
-  const contactSheetY = useRef(new Animated.Value(-40)).current;
-  const contactSheetOpacity = useRef(new Animated.Value(0)).current;
-
-  const txt = isArabic
-    ? {
-        title: 'طلب سيارة إسعاف',
-        topSub: 'اطلب الخدمة خطوة بخطوة',
-        back: 'رجوع',
-        next: 'التالي',
-        previous: 'السابق',
-        finish: 'إرسال الطلب',
-        step1: 'المسار',
-        step2: 'الاستعجال',
-        step3: 'المعلومات',
-        step4: 'التأكيد',
-        routeTitle: 'حدد مسار التدخل',
-        routeSub: 'اختر هل التدخل داخل نفس المدينة أو بين مدينتين.',
-        sameCity: 'نفس المدينة',
-        interCity: 'من مدينة إلى مدينة',
-        from: 'من',
-        to: 'إلى',
-        chooseCity: 'اختر المدينة',
-        myPosition: 'موقعي',
-        address: 'العنوان أو وصف دقيق للمكان',
-        urgencyTitle: 'اختر نوع الاستعجال',
-        urgencySub: 'سنوجه الطلب حسب الأولوية ونوع التدخل المطلوب.',
-        urgent: 'حالة استعجالية',
-        urgentSub: 'ألم قوي، نزيف، ضيق تنفس، حالة مستعجلة',
-        medical: 'تدخل طبي',
-        medicalSub: 'مرافقة طبية، فحص أو حالة صحية غير مستقرة',
-        transport: 'نقل طبي',
-        transportSub: 'نقل إلى مستشفى أو مركز علاج أو مصحة',
-        formTitle: 'معلومات المريض',
-        formSub: 'أدخل البيانات الأساسية لتأكيد الطلب بسرعة.',
-        name: 'اسم المريض',
-        phone: 'رقم الهاتف',
-        notes: 'ملاحظات إضافية',
-        notesPlaceholder: 'مثلا: الطابق، الباب، الحالة، أو تفاصيل مفيدة للفريق',
-        recapTitle: 'تأكيد الطلب',
-        recapSub: 'راجع المعلومات ثم أرسل الطلب أو اتصل مباشرة.',
-        summaryRoute: 'المسار',
-        summaryType: 'نوع التدخل',
-        callNow: 'اتصال الآن',
-        sendNow: 'تأكيد وإرسال',
-        cityTitle: 'اختيار المدينة',
-        requiredRoute: 'اختر مدينة الانطلاق والوصول.',
-        requiredForm: 'الاسم ورقم الهاتف ضروريان.',
-        locationOff: 'يرجى تفعيل الموقع أولا.',
-        currentDetected: 'تم تحديد موقعك الحالي.',
-        sent: 'تم إرسال طلب الإسعاف بنجاح.',
-        fail: 'تعذر الإرسال. حاول مرة أخرى.',
-      }
-    : {
-        title: 'Commander une Ambulance',
-        topSub: 'Un parcours simple et rapide',
-        back: 'Retour',
-        next: 'Suivant',
-        previous: 'Retour',
-        finish: 'Envoyer',
-        step1: 'Trajet',
-        step2: 'Urgence',
-        step3: 'Formulaire',
-        step4: 'Appel',
-        routeTitle: 'Definir le trajet',
-        routeSub: "Choisissez si l'intervention se fait dans la même ville ou entre deux villes.",
-        sameCity: 'Même ville',
-        interCity: 'Ville a ville',
-        from: 'De',
-        to: 'Vers',
-        chooseCity: 'Choisir une ville',
-        myPosition: 'Ma position',
-        address: 'Adresse ou details precis',
-        urgencyTitle: "Choisir le type d'urgence",
-        urgencySub: "Nous orientons l'équipe selon le niveau d'urgence et le besoin médical.",
-        urgent: 'Urgence vitale',
-        urgentSub: 'Douleur forte, saignement, détresse, intervention prioritaire',
-        medical: 'Urgence médicale',
-        medicalSub: 'Accompagnement médical, malaise ou état instable',
-        transport: 'Transport médical',
-        transportSub: 'Transfert vers hôpital, clinique ou centre de soin',
-        formTitle: 'Informations patient',
-        formSub: 'Ajoutez les informations essentielles pour valider rapidement la demande.',
-        name: 'Nom complet',
-        phone: 'Telephone',
-        notes: 'Notes',
-        notesPlaceholder: "Ex. : étage, code, état du patient, détails utiles pour l'équipe",
-        recapTitle: 'Confirmation finale',
-        recapSub: 'Vérifiez les informations puis envoyez la demande ou appelez directement.',
-        summaryRoute: 'Trajet',
-        summaryType: "Type d'intervention",
-        callNow: 'Appeler',
-        sendNow: 'Confirmer et envoyer',
-        cityTitle: 'Choisir une ville',
-        requiredRoute: 'Choisissez le depart et la destination.',
-        requiredForm: 'Le nom et le numéro de téléphone sont obligatoires.',
-        locationOff: 'Activez la localisation pour continuer.',
-        currentDetected: 'Position actuelle détectée.',
-        sent: "La demande d'ambulance a ete envoyee.",
-        fail: 'Envoi impossible. Réessayez.',
-      };
-
-  const contactTxt = isArabic
-    ? {
-        quickOrder: 'طلب مباشر بالاتصال',
-        quickOrderSub: 'واتساب أو اتصال عادي',
-        chooseContact: 'اختر طريقة التواصل',
-        chooseContactSub: 'يمكنك التواصل مباشرة بواسطة واتساب أو عبر اتصال عادي.',
-        whatsapp: 'WhatsApp',
-        normalCall: 'اتصال عادي',
-        close: 'إغلاق',
-        noCallApp: 'تعذر فتح تطبيق الاتصال.',
-        noWhatsapp: 'واتساب غير متوفر على هذا الجهاز.',
-      }
-    : {
-        quickOrder: 'Commander directement par appel',
-        quickOrderSub: 'WhatsApp ou appel normal',
-        chooseContact: 'Choisir le mode de contact',
-        chooseContactSub: "Vous pouvez contacter l'équipe directement via WhatsApp ou appel normal.",
-        whatsapp: 'WhatsApp',
-        normalCall: 'Appel normal',
-        close: 'Fermer',
-        noCallApp: "Impossible d'ouvrir l'application d'appel.",
-        noWhatsapp: "WhatsApp n'est pas disponible sur cet appareil.",
-      };
-
-  const arrivalTxt = isArabic
-    ? {
-        badge: 'وصول سريع',
-        text: 'سيارة الإسعاف قد تصل في أقل من 10 دقائق.',
-      }
-    : {
-        badge: 'Arrivee rapide',
-        text: "L'ambulance peut arriver en moins de 10 minutes.",
-      };
-
-  const stepTitles = [txt.step1, txt.step2, txt.step3, txt.step4];
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState(emptyForm);
-  const [loading, setLoading] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerField, setPickerField] = useState('fromLocation');
-  const [contactSheetOpen, setContactSheetOpen] = useState(false);
+  
+  const [step, setStep] = useState(1);
+  const [selectedCity, setSelectedCity] = useState(null); // Now stores { ar, fr }
+  const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState({ visible: false, text: '', type: 'info', id: 0 });
 
+  // Reset search and selection if language changes
   useEffect(() => {
-    const savedPhone = preferences?.account?.user?.phone || preferences?.account?.phone || '';
-    const savedName = preferences?.account?.user?.name || '';
-    setForm((prev) => ({
-      ...prev,
-      name: prev.name || savedName,
-      phone: prev.phone || savedPhone,
+    setSearchQuery('');
+    setSelectedCity(null);
+  }, [language]);
+
+  const currentRegions = useMemo(() => {
+    return MOROCCO_REGIONS.map(reg => ({
+      title: isArabic ? reg.ar : reg.fr,
+      data: reg.cities.map(city => ({
+        display: isArabic ? city.ar : city.fr,
+        ar: city.ar,
+        fr: city.fr
+      }))
     }));
-  }, [preferences]);
+  }, [isArabic]);
+
+  const filteredSections = useMemo(() => {
+    if (!searchQuery) return currentRegions;
+    return currentRegions.map(region => ({
+      ...region,
+      data: region.data.filter(city => 
+        city.display.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        city.ar.includes(searchQuery) ||
+        city.fr.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    })).filter(region => region.data.length > 0);
+  }, [searchQuery, currentRegions]);
 
   const showToast = (text, type = 'info') => {
     setToast({
@@ -233,437 +228,196 @@ export default function AmbulanceScreen({ onBack, preferences }) {
     });
   };
 
-  const animateContactSheet = (visible) => {
-    Animated.parallel([
-      Animated.timing(contactSheetOpacity, {
-        toValue: visible ? 1 : 0,
-        duration: 220,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(contactSheetY, {
-        toValue: visible ? 0 : -40,
-        duration: 260,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start(({ finished }) => {
-      if (finished && !visible) {
-        setContactSheetOpen(false);
-      }
-    });
-  };
-
-  const openContactSheet = () => {
-    setContactSheetOpen(true);
-    requestAnimationFrame(() => animateContactSheet(true));
-  };
-
-  const closeContactSheet = () => {
-    animateContactSheet(false);
-  };
-
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
-
-  const openRegularCall = async () => {
-    const url = `tel:${SUPPORT_PHONE}`;
-    try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (!canOpen) {
-        showToast(contactTxt.noCallApp, 'error');
-        return;
-      }
-      closeContactSheet();
-      await Linking.openURL(url);
-    } catch (_error) {
-      showToast(contactTxt.noCallApp, 'error');
+  const getContactNumbers = () => {
+    const customCities = new Set([
+      'بركان',
+      'تاوريرت',
+      'جرادة',
+      'فجيج',
+      'أحفير',
+      'زايو',
+      'السعيدية',
+      'فاس',
+      'مكناس',
+      'تازة',
+      'إفران',
+      'آزرو',
+      'صفرو',
+      'بولمان',
+      'الحاجب',
+    ]);
+    const rabatCities = new Set([
+      'الرباط',
+      'سلا',
+      'القنيطرة',
+      'تمارة',
+      'الصخيرات',
+      'سيدي قاسم',
+      'سيدي سليمان',
+    ]);
+    const casablancaCities = new Set([
+      'الدار البيضاء',
+      'المحمدية',
+      'الجديدة',
+      'سطات',
+      'برشيد',
+      'بنسليمان',
+      'سيدي بنور',
+    ]);
+    if (selectedCity && casablancaCities.has(selectedCity.ar)) {
+      return { call: '+212522491616', whatsapp: '+212661502763' };
     }
-  };
-
-  const openWhatsapp = async () => {
-    const cleanPhone = SUPPORT_PHONE.replace(/[^\d]/g, '');
-    const message = encodeURIComponent(isArabic ? 'السلام عليكم، أريد طلب سيارة إسعاف.' : 'Bonjour, je souhaite commander une ambulance.');
-    const nativeUrl = `whatsapp://send?phone=${cleanPhone}&text=${message}`;
-    const webUrl = `https://wa.me/${cleanPhone}?text=${message}`;
-
-    try {
-      const canOpenNative = await Linking.canOpenURL(nativeUrl);
-      closeContactSheet();
-      if (canOpenNative) {
-        await Linking.openURL(nativeUrl);
-        return;
-      }
-
-      const canOpenWeb = await Linking.canOpenURL(webUrl);
-      if (canOpenWeb) {
-        await Linking.openURL(webUrl);
-        return;
-      }
-
-      showToast(contactTxt.noWhatsapp, 'error');
-    } catch (_error) {
-      showToast(contactTxt.noWhatsapp, 'error');
+    const laayouneCities = new Set([
+      'العيون',
+      'السمارة',
+      'طرفاية',
+      'بوجدور',
+    ]);
+    if (selectedCity && laayouneCities.has(selectedCity.ar)) {
+      return { call: '+212528997601', whatsapp: '0678989004' };
     }
-  };
-
-  const cityLabel = (id) => {
-    const item = CITY_OPTIONS.find((city) => city.id === id);
-    return item?.[language] || item?.fr || item?.en || '';
-  };
-
-  const typeText = (id) => {
-    if (id === 'medical') return txt.medical;
-    if (id === 'transport') return txt.transport;
-    return txt.urgent;
-  };
-
-  const setNearestCity = (coords) => {
-    const nearest = CITY_OPTIONS.reduce((closest, city) => {
-      if (!closest) return city;
-      const cityCoords = CITY_COORDS[city.id];
-      const closestCoords = CITY_COORDS[closest.id];
-      const dist = Math.abs(coords.latitude - cityCoords[0]) + Math.abs(coords.longitude - cityCoords[1]);
-      const best = Math.abs(coords.latitude - closestCoords[0]) + Math.abs(coords.longitude - closestCoords[1]);
-      return dist < best ? city : closest;
-    }, null);
-
-    if (nearest) {
-      setForm((prev) => ({
-        ...prev,
-        fromLocation: nearest.id,
-        toLocation: prev.transferMode === 'same_city' ? nearest.id : prev.toLocation,
-      }));
+    const soussMassaCities = new Set([
+      'أكادير',
+      'إنزكان',
+      'تارودانت',
+      'تيزنيت',
+      'شتوكة آيت باها',
+    ]);
+    if (selectedCity && soussMassaCities.has(selectedCity.ar)) {
+      return { call: '+212528840626', whatsapp: '+212662028249' };
     }
-  };
-
-  const locateMe = async () => {
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== 'granted') {
-        showToast(txt.locationOff, 'error');
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-
-      if (!location?.coords) {
-        showToast(txt.fail, 'error');
-        return;
-      }
-
-      const coords = location.coords;
-      setNearestCity(coords);
-
-      try {
-        const reverse = await Location.reverseGeocodeAsync({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-        const place = reverse?.[0];
-        const nextAddress = [place?.streetNumber, place?.street, place?.city].filter(Boolean).join(', ');
-        update('address', nextAddress || `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
-      } catch (_geoError) {
-        update('address', `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
-      }
-
-      showToast(txt.currentDetected, 'success');
-    } catch (_error) {
-      showToast(txt.fail, 'error');
+    const draaTafilaletCities = new Set([
+      'الرشيدية',
+      'ورزازات',
+      'زاكورة',
+      'تنغير',
+      'ميدلت',
+      'الريصاني',
+    ]);
+    if (selectedCity && draaTafilaletCities.has(selectedCity.ar)) {
+      return { call: '+212524885667', whatsapp: '+212661856513' };
     }
-  };
-
-  const validateStep = () => {
-    if (step === 0) {
-      if (!form.fromLocation || !form.toLocation) {
-        showToast(txt.requiredRoute, 'error');
-        return false;
-      }
-      return true;
+    const beniMellalCities = new Set([
+      'بني ملال',
+      'خنيفرة',
+      'أزيلال',
+      'الفقيه بن صالح',
+    ]);
+    if (selectedCity && beniMellalCities.has(selectedCity.ar)) {
+      return { call: '+212522491616', whatsapp: '+212661502763' };
     }
-
-    if (step === 2) {
-      if (!form.name.trim() || !form.phone.trim()) {
-        showToast(txt.requiredForm, 'error');
-        return false;
-      }
-      return true;
+    if (selectedCity && rabatCities.has(selectedCity.ar)) {
+      return { call: '+212537706017', whatsapp: '+212700995153' };
     }
-
-    return true;
+    if (selectedCity && customCities.has(selectedCity.ar)) {
+      return { call: '+212536703025', whatsapp: '+212661088413' };
+    }
+    return {
+      call: DEFAULT_PHONE,
+      whatsapp: DEFAULT_WHATSAPP,
+    };
   };
 
-  const nextStep = () => {
-    if (!validateStep()) return;
-    setStep((prev) => Math.min(TOTAL_STEPS - 1, prev + 1));
-  };
-
-  const previousStep = () => {
-    setStep((prev) => Math.max(0, prev - 1));
-  };
-
-  const submit = async () => {
-    if (!validateStep()) return;
-
-    setLoading(true);
-    try {
-      let coords = null;
-      try {
-        const permission = await Location.requestForegroundPermissionsAsync();
-        if (permission.status === 'granted') {
-          const location = await Location.getCurrentPositionAsync({});
-          coords = location.coords;
-        }
-      } catch (_error) {
-        coords = null;
+  const txt = isArabic
+    ? {
+        title: 'طلب سيارة إسعاف',
+        subtitle: 'تدخل سريع 24/24 ساعة',
+        heroTitle: 'سيارة إسعاف',
+        badge: '24ساعة/7أيام',
+        call: 'اتصل الآن',
+        whatsapp: 'واتساب',
+        website: 'زيارة الموقع',
+        noApp: 'تعذر فتح التطبيق المطلوب.',
+        step1Title: 'اختر مدينتك',
+        step1Sub: 'يرجى تحديد المدينة لتقديم أفضل خدمة',
+        searchPlaceholder: 'ابحث عن مدينة...',
+        next: 'التالي',
+        back: 'رجوع',
+        callDirect: 'اتصال مباشر',
+        whatsappDirect: 'واتساب مباشر',
+        heroDesc: 'تصل سيارة الإسعاف الخاصة بنا عادةً في غضون 5 إلى 15 دقيقة. الخدمة متوفرة 24/24 ساعة و 7/7 أيام.',
       }
-
-      const payload = {
-        ...form,
-        fromLocation: cityLabel(form.fromLocation),
-        toLocation: cityLabel(form.transferMode === 'same_city' ? form.fromLocation : form.toLocation),
-        lat: coords?.latitude,
-        lng: coords?.longitude,
+    : {
+        title: 'Commander une Ambulance',
+        subtitle: 'Intervention rapide 24h/24',
+        heroTitle: 'Ambulance',
+        badge: '24h/7j',
+        call: 'Appeler maintenant',
+        whatsapp: 'WhatsApp',
+        website: 'Visiter le site web',
+        noApp: 'Impossible d\'ouvrir l\'application.',
+        step1Title: 'Choisissez votre ville',
+        step1Sub: 'Veuillez sélectionner une ville pour un service optimal',
+        searchPlaceholder: 'Rechercher une ville...',
+        next: 'Suivant',
+        back: 'Retour',
+        callDirect: 'Appel direct',
+        whatsappDirect: 'WhatsApp direct',
+        heroDesc: 'Notre ambulance arrive généralement en 5 à 15 minutes. Service disponible 24h/24 et 7j/7.',
       };
 
-      try {
-        await createAmbulanceRequest(payload);
-      } catch (_apiError) {
-        const fallback = await submitRequestWithFormSubmit({ type: 'ambulance', payload });
-        if (!fallback.ok) {
-          throw new Error(fallback.error || 'fallback failed');
-        }
+  const handleCall = async () => {
+    const { call } = getContactNumbers();
+    const cleanPhone = call.replace(/[^\d+]/g, '');
+    const url = `tel:${cleanPhone}`;
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        showToast(txt.noApp, 'error');
       }
-
-      showToast(txt.sent, 'success');
-      setStep(0);
-      setForm((prev) => ({
-        ...emptyForm,
-        name: prev.name,
-        phone: prev.phone,
-      }));
-    } catch (_error) {
-      showToast(txt.fail, 'error');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      showToast(txt.noApp, 'error');
     }
   };
 
-  const renderStepOne = () => (
-    <View style={[styles.stepCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.routeTitle}</Text>
-      <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.routeSub}</Text>
+  const handleWhatsApp = async () => {
+    const { whatsapp } = getContactNumbers();
+    // Clean phone: remove all non-digit chars except leading +
+    let digits = whatsapp.replace(/[^\d]/g, '');
+    // Handle local Moroccan numbers starting with 0 → replace with 212
+    if (digits.startsWith('0')) {
+      digits = '212' + digits.slice(1);
+    }
+    // Remove any leading + that may remain
+    digits = digits.replace(/^\+/, '');
+    const cityDisplay = selectedCity
+      ? (isArabic ? selectedCity.ar : selectedCity.fr)
+      : (isArabic ? 'مدينتي' : 'ma ville');
+    const message = encodeURIComponent(
+      isArabic
+        ? `السلام عليكم، أحتاج إلى سيارة إسعاف في ${cityDisplay}.`
+        : `Bonjour, j'ai besoin d'une ambulance d'urgence à ${cityDisplay}.`
+    );
+    // wa.me is the most reliable cross-platform WhatsApp link
+    const waUrl = `https://wa.me/${digits}?text=${message}`;
+    try {
+      await Linking.openURL(waUrl);
+    } catch {
+      showToast(txt.noApp, 'error');
+    }
+  };
 
-      <View style={styles.modeRow}>
-        <TouchableOpacity
-          style={[
-            styles.modePill,
-            form.transferMode === 'same_city' && styles.modePillActive,
-            isDark && { backgroundColor: colors.surfaceAlt, borderColor: form.transferMode === 'same_city' ? '#ff5959' : colors.border },
-          ]}
-          onPress={() =>
-            setForm((prev) => ({
-              ...prev,
-              transferMode: 'same_city',
-              toLocation: prev.fromLocation,
-            }))
-          }
+  const handleWebsite = async () => {
+    try {
+      await Linking.openURL(WEBSITE_URL);
+    } catch (err) {
+      showToast(txt.noApp, 'error');
+    }
+  };
+
+  const renderStepIndicator = () => (
+    <View style={styles.navigationRow}>
+      <View style={[styles.stepCounterPill, isDark && { backgroundColor: '#ff5c5c' }]}>
+        <Text style={styles.stepCounterText}>{step} / 2</Text>
+      </View>
+      <View style={styles.navigationRightSide}>
+        <TouchableOpacity 
+          style={[styles.secondaryNavBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
+          onPress={() => step === 1 ? onBack() : setStep(1)}
         >
-          <Text style={[styles.modePillText, arBold, { color: form.transferMode === 'same_city' ? '#ff4a4a' : colors.textPrimary }]}>{txt.sameCity}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.modePill,
-            form.transferMode === 'inter_city' && styles.modePillActive,
-            isDark && { backgroundColor: colors.surfaceAlt, borderColor: form.transferMode === 'inter_city' ? '#ff5959' : colors.border },
-          ]}
-          onPress={() => update('transferMode', 'inter_city')}
-        >
-          <Text style={[styles.modePillText, arBold, { color: form.transferMode === 'inter_city' ? '#ff4a4a' : colors.textPrimary }]}>{txt.interCity}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.routeStack}>
-        <TouchableOpacity
-          style={[styles.routeField, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-          onPress={() => {
-            setPickerField('fromLocation');
-            setPickerOpen(true);
-          }}
-        >
-          <View style={[styles.routeIconWrap, isDark && { backgroundColor: colors.surface }]}>
-            <Ionicons name="radio-button-on" size={14} color="#33c36b" />
-          </View>
-          <View style={styles.routeTextWrap}>
-            <Text style={[styles.routeLabel, arRegular, { color: colors.textSecondary }]}>{txt.from}</Text>
-            <Text style={[styles.routeValue, arBold, { color: colors.textPrimary }]}>{cityLabel(form.fromLocation)}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        {form.transferMode === 'inter_city' && (
-          <>
-            <View style={styles.routeConnector}>
-              <View style={styles.routeConnectorLine} />
-              <View style={styles.routeConnectorDot} />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.routeField, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-              onPress={() => {
-                setPickerField('toLocation');
-                setPickerOpen(true);
-              }}
-            >
-              <View style={[styles.routeIconWrap, isDark && { backgroundColor: colors.surface }]}>
-                <Ionicons name="location" size={14} color="#ff5a4f" />
-              </View>
-              <View style={styles.routeTextWrap}>
-                <Text style={[styles.routeLabel, arRegular, { color: colors.textSecondary }]}>{txt.to}</Text>
-                <Text style={[styles.routeValue, arBold, { color: colors.textPrimary }]}>{cityLabel(form.toLocation)}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-
-      <View style={styles.routeActionsRow}>
-        <TouchableOpacity style={styles.locateChip} onPress={locateMe}>
-          <Ionicons name="locate-outline" size={14} color="#4d79d8" />
-          <Text style={[styles.locateChipText, arRegular]}>{txt.myPosition}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={[styles.addressInputShell, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-        <TextInput
-          value={form.address}
-          onChangeText={(value) => update('address', value)}
-          placeholder={txt.address}
-          placeholderTextColor={colors.textSecondary}
-          style={[styles.addressInput, arRegular, { color: colors.textPrimary }]}
-          multiline
-        />
-      </View>
-    </View>
-  );
-
-  const renderStepTwo = () => (
-    <View style={[styles.stepCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.urgencyTitle}</Text>
-      <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.urgencySub}</Text>
-
-      {typeOptions.map((item) => {
-        const active = form.interventionType === item.id;
-        const title = item.id === 'medical' ? txt.medical : item.id === 'transport' ? txt.transport : txt.urgent;
-        const subtitle = item.id === 'medical' ? txt.medicalSub : item.id === 'transport' ? txt.transportSub : txt.urgentSub;
-
-        return (
-          <TouchableOpacity
-            key={item.id}
-            style={[
-              styles.typeOption,
-              active && styles.typeOptionActive,
-              isDark && { backgroundColor: colors.surfaceAlt, borderColor: active ? '#ff5959' : colors.border },
-            ]}
-            onPress={() => update('interventionType', item.id)}
-          >
-            <View style={styles.typeOptionLeft}>
-              <View style={[styles.typeIconWrap, isDark && { backgroundColor: colors.surface }]}>
-                <Ionicons name={item.icon} size={16} color={item.color} />
-              </View>
-              <View style={styles.typeTextWrap}>
-                <Text style={[styles.typeTitle, arBold, { color: colors.textPrimary }]}>{title}</Text>
-                <Text style={[styles.typeSub, arRegular, { color: colors.textSecondary }]}>{subtitle}</Text>
-              </View>
-            </View>
-            <Ionicons name={active ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={active ? '#ff4a4a' : '#cad4df'} />
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-
-  const renderStepThree = () => (
-    <View style={[styles.stepCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.formTitle}</Text>
-      <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.formSub}</Text>
-
-      <View style={[styles.fieldBlock, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-        <Text style={[styles.inputLabel, arBold, { color: colors.textPrimary }]}>{txt.name}</Text>
-        <TextInput
-          value={form.name}
-          onChangeText={(value) => update('name', value)}
-          style={[styles.fieldInputFull, arRegular, { color: colors.textPrimary }]}
-          placeholder={txt.name}
-          placeholderTextColor={colors.textSecondary}
-        />
-      </View>
-
-      <View style={[styles.fieldBlock, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-        <Text style={[styles.inputLabel, arBold, { color: colors.textPrimary }]}>{txt.phone}</Text>
-        <TextInput
-          value={form.phone}
-          keyboardType="phone-pad"
-          onChangeText={(value) => update('phone', value)}
-          style={[styles.fieldInputFull, arRegular, { color: colors.textPrimary }]}
-          placeholder={txt.phone}
-          placeholderTextColor={colors.textSecondary}
-        />
-      </View>
-
-      <View style={[styles.notesBlock, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-        <Text style={[styles.inputLabel, arBold, { color: colors.textPrimary }]}>{txt.notes}</Text>
-        <TextInput
-          value={form.notes}
-          onChangeText={(value) => update('notes', value)}
-          style={[styles.notesInput, arRegular, { color: colors.textPrimary }]}
-          placeholder={txt.notesPlaceholder}
-          placeholderTextColor={colors.textSecondary}
-          multiline
-          textAlignVertical="top"
-        />
-      </View>
-    </View>
-  );
-
-  const renderStepFour = () => (
-    <View style={[styles.stepCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.recapTitle}</Text>
-      <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.recapSub}</Text>
-
-      <View style={[styles.summaryCard, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, arRegular, { color: colors.textSecondary }]}>{txt.summaryRoute}</Text>
-          <Text style={[styles.summaryValue, arBold, { color: colors.textPrimary }]}>
-            {cityLabel(form.fromLocation)} {form.transferMode === 'inter_city' ? `→ ${cityLabel(form.toLocation)}` : ''}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, arRegular, { color: colors.textSecondary }]}>{txt.summaryType}</Text>
-          <Text style={[styles.summaryValue, arBold, { color: colors.textPrimary }]}>{typeText(form.interventionType)}</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, arRegular, { color: colors.textSecondary }]}>{txt.name}</Text>
-          <Text style={[styles.summaryValue, arBold, { color: colors.textPrimary }]}>{form.name || '-'}</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, arRegular, { color: colors.textSecondary }]}>{txt.phone}</Text>
-          <Text style={[styles.summaryValue, arBold, { color: colors.textPrimary }]}>{form.phone || '-'}</Text>
-        </View>
-      </View>
-
-      <View style={styles.finalActions}>
-        <TouchableOpacity style={[styles.callNowBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={openContactSheet} disabled={loading}>
-          <Ionicons name="call-outline" size={18} color="#203554" />
-          <Text style={[styles.callNowText, arBold]}>{txt.callNow}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={loading}>
-          <Ionicons name="checkmark-circle-outline" size={18} color="#ffffff" />
-          <Text style={[styles.submitBtnText, arBold]}>{loading ? '...' : txt.sendNow}</Text>
+          <Text style={[styles.secondaryNavText, { color: colors.textPrimary }, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.back}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -673,156 +427,158 @@ export default function AmbulanceScreen({ onBack, preferences }) {
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopToast toast={toast} onHide={() => setToast((prev) => ({ ...prev, visible: false }))} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.topBar, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={step === 0 ? onBack : previousStep}>
+      <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.topBar}>
+          <TouchableOpacity 
+            style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
+            onPress={step === 1 ? onBack : () => setStep(1)}
+          >
             <Ionicons name="arrow-back" size={s(20, 18, 24)} color={isDark ? colors.textPrimary : '#203554'} />
           </TouchableOpacity>
 
           <View style={styles.topTitleWrap}>
-            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
-            <Text style={[styles.topSub, arRegular, { color: colors.textSecondary }]}>{txt.topSub}</Text>
+            <Text style={[styles.topTitle, isArabic && { fontFamily: 'Cairo_700Bold' }, { color: colors.textPrimary }]}>
+              {step === 1 ? txt.step1Title : txt.title}
+            </Text>
+            <Text style={[styles.topSub, isArabic && { fontFamily: 'Cairo_400Regular' }, { color: colors.textSecondary }]}>
+              {step === 1 ? txt.step1Sub : txt.subtitle}
+            </Text>
           </View>
 
-          <View style={[styles.topActionBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-            <Ionicons name="person-outline" size={18} color={colors.textPrimary} />
-          </View>
-        </View>
-
-        <View style={styles.progressWrap}>
-          {stepTitles.map((label, index) => {
-            const active = index === step;
-            const done = index < step;
-            return (
-              <View key={label} style={styles.progressItem}>
-                <View style={[styles.progressDot, active && styles.progressDotActive, done && styles.progressDotDone]}>
-                  <Text style={[styles.progressDotText, (active || done) && styles.progressDotTextActive]}>{index + 1}</Text>
-                </View>
-                <Text style={[styles.progressLabel, arRegular, { color: active || done ? colors.textPrimary : colors.textSecondary }]} numberOfLines={1}>
-                  {label}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <TouchableOpacity style={[styles.quickOrderBtn, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={openContactSheet} activeOpacity={0.92}>
-          <View style={styles.quickOrderIcon}>
-            <Ionicons name="call-outline" size={18} color="#ffffff" />
-          </View>
-          <View style={styles.quickOrderTextWrap}>
-            <Text style={[styles.quickOrderTitle, arBold, { color: colors.textPrimary }]}>{contactTxt.quickOrder}</Text>
-            <Text style={[styles.quickOrderSub, arRegular, { color: colors.textSecondary }]}>{contactTxt.quickOrderSub}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        <View style={[styles.arrivalInfoCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.arrivalBadge}>
-            <Ionicons name="time-outline" size={14} color="#ffffff" />
-            <Text style={[styles.arrivalBadgeText, arBold]}>{arrivalTxt.badge}</Text>
-          </View>
-          <Text style={[styles.arrivalInfoText, arRegular, { color: colors.textPrimary }]}>{arrivalTxt.text}</Text>
-        </View>
-
-        {step === 0 && renderStepOne()}
-        {step === 1 && renderStepTwo()}
-        {step === 2 && renderStepThree()}
-        {step === 3 && renderStepFour()}
-
-        {step < TOTAL_STEPS - 1 && (
-          <View style={styles.navigationRow}>
-            <View style={styles.stepCounterInline}>
-              <Text style={[styles.stepCounterInlineText, arBold]}>{step + 1}/{TOTAL_STEPS}</Text>
-            </View>
-
-            <View style={styles.navigationRightSide}>
-              {step > 0 && (
-                <TouchableOpacity style={[styles.secondaryNavBtn, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={previousStep}>
-                  <Text style={[styles.secondaryNavText, arBold, { color: colors.textPrimary }]}>{txt.previous}</Text>
-                </TouchableOpacity>
-              )}
-
-              <TouchableOpacity style={styles.primaryNavBtn} onPress={nextStep}>
-                <Text style={[styles.primaryNavText, arBold]}>{txt.next}</Text>
-                <Ionicons name="arrow-forward" size={16} color="#ffffff" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      </ScrollView>
-
-      <Modal transparent visible={pickerOpen} animationType="fade" onRequestClose={() => setPickerOpen(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setPickerOpen(false)}>
-          <View style={[styles.modalCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.modalTitle, arBold, { color: colors.textPrimary }]}>{txt.cityTitle}</Text>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {CITY_OPTIONS.map((city) => {
-                const active = form[pickerField] === city.id;
-                return (
-                  <TouchableOpacity
-                    key={city.id}
-                    style={[styles.cityItem, active && styles.cityItemActive, isDark && { backgroundColor: colors.surfaceAlt, borderColor: active ? '#ff5959' : colors.border }]}
-                    onPress={() => {
-                      setForm((prev) => {
-                        const next = { ...prev, [pickerField]: city.id };
-                        if (pickerField === 'fromLocation' && prev.transferMode === 'same_city') {
-                          next.toLocation = city.id;
-                        }
-                        return next;
-                      });
-                      setPickerOpen(false);
-                    }}
-                  >
-                    <Text style={[styles.cityItemText, arRegular, { color: colors.textPrimary }]}>{city[language] || city.fr}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal>
-
-      <Modal transparent visible={contactSheetOpen} animationType="none" onRequestClose={closeContactSheet}>
-        <Pressable style={styles.contactOverlay} onPress={closeContactSheet}>
-          <Animated.View
-            style={[
-              styles.contactSheet,
-              isDark && { backgroundColor: colors.surface, borderColor: colors.border },
-              {
-                opacity: contactSheetOpacity,
-                transform: [{ translateY: contactSheetY }],
-              },
-            ]}
+          <TouchableOpacity 
+            style={[styles.topActionBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
+            onPress={() => onNavigate?.('settings')}
           >
-            <Pressable>
-              <View style={styles.contactHandle} />
-              <Text style={[styles.contactTitle, arBold, { color: colors.textPrimary }]}>{contactTxt.chooseContact}</Text>
-              <Text style={[styles.contactSub, arRegular, { color: colors.textSecondary }]}>{contactTxt.chooseContactSub}</Text>
+            <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-              <TouchableOpacity style={styles.contactOptionBtn} onPress={openWhatsapp} activeOpacity={0.9}>
-                <View style={[styles.contactOptionIcon, { backgroundColor: '#25D366' }]}>
-                  <Ionicons name="logo-whatsapp" size={18} color="#ffffff" />
+      {step === 1 ? (
+        <View style={{ flex: 1, paddingHorizontal: s(14) }}>
+          <View style={[styles.fieldBlock, { marginTop: s(14), flexDirection: 'row', alignItems: 'center' }, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+            <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={{ marginRight: 10 }} />
+            <TextInput
+              style={[styles.fieldInputFull, { flex: 1, color: colors.textPrimary }, isArabic && { textAlign: 'right', fontFamily: 'Cairo_400Regular' }]}
+              placeholder={txt.searchPlaceholder}
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.quickCallRow}>
+            <TouchableOpacity 
+              style={[styles.quickAltBtn, { backgroundColor: '#ef4444', borderColor: '#ef4444' }]} 
+              onPress={() => handleCall()}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="call" size={20} color="#fff" />
+              <Text style={[styles.quickAltText, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.callDirect}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.quickAltBtn, { backgroundColor: '#22c55e', borderColor: '#22c55e' }]} 
+              onPress={() => handleWhatsApp()}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+              <Text style={[styles.quickAltText, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.whatsappDirect}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <SectionList
+            sections={filteredSections}
+            keyExtractor={(item) => item.ar}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.cityItem,
+                  selectedCity?.ar === item.ar && styles.cityItemActive,
+                  isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
+                  isDark && selectedCity?.ar === item.ar && { borderColor: '#ff5c5c', backgroundColor: '#3d2b2b' }
+                ]}
+                onPress={() => {
+                  setSelectedCity(item);
+                  setStep(2);
+                }}
+              >
+                <Text style={[
+                  styles.cityItemText,
+                  { color: colors.textPrimary },
+                  selectedCity?.ar === item.ar && { color: '#ff4b4b' },
+                  isArabic && { fontFamily: 'Cairo_700Bold' }
+                ]}>
+                  {item.display}
+                </Text>
+              </TouchableOpacity>
+            )}
+            renderSectionHeader={({ section: { title } }) => (
+              <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+                <Text style={[styles.sectionTitle, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{title}</Text>
+              </View>
+            )}
+            style={{ marginTop: s(10) }}
+            showsVerticalScrollIndicator={false}
+            stickySectionHeadersEnabled={false}
+          />
+          
+          <View style={{ paddingVertical: s(14) }}>
+            {renderStepIndicator()}
+          </View>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={[styles.emergencyCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={{ width: '100%', height: s(220) }}>
+              <Image
+                source={require('../../assets/ambulance_hero.jpeg')}
+                style={styles.heroImg}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.6)']}
+                style={styles.heroOverlay}
+              >
+                <View style={[styles.infoBadge, { backgroundColor: '#ff4b4b', borderColor: '#ff4b4b', alignSelf: 'flex-start' }]}>
+                  <Text style={[styles.infoBadgeText, { color: '#fff' }, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.badge}</Text>
                 </View>
-                <Text style={[styles.contactOptionText, arBold]}>{contactTxt.whatsapp}</Text>
-                <Ionicons name="chevron-forward" size={18} color="#6982a9" />
-              </TouchableOpacity>
+              </LinearGradient>
+            </View>
+            
+            <View style={styles.emergencyBody}>
+              <Text style={[styles.emergencyTitle, isArabic && { fontFamily: 'Cairo_700Bold' }, { color: colors.textPrimary }]}>
+                {txt.heroTitle} - {isArabic ? selectedCity?.ar : selectedCity?.fr}
+              </Text>
 
-              <TouchableOpacity style={styles.contactOptionBtn} onPress={openRegularCall} activeOpacity={0.9}>
-                <View style={[styles.contactOptionIcon, { backgroundColor: '#4e8cff' }]}>
-                  <Ionicons name="call-outline" size={18} color="#ffffff" />
-                </View>
-                <Text style={[styles.contactOptionText, arBold]}>{contactTxt.normalCall}</Text>
-                <Ionicons name="chevron-forward" size={18} color="#6982a9" />
-              </TouchableOpacity>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.btnCall} onPress={handleCall} activeOpacity={0.8}>
+                  <Ionicons name="call" size={24} color="#ffffff" />
+                  <Text style={[styles.btnText, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.call}</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.contactCloseBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={closeContactSheet}>
-                <Text style={[styles.contactCloseText, arBold, { color: colors.textPrimary }]}>{contactTxt.close}</Text>
-              </TouchableOpacity>
-            </Pressable>
-          </Animated.View>
-        </Pressable>
-      </Modal>
+                <TouchableOpacity style={styles.btnWhatsapp} onPress={handleWhatsApp} activeOpacity={0.8}>
+                  <Ionicons name="logo-whatsapp" size={24} color="#ffffff" />
+                  <Text style={[styles.btnText, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.whatsapp}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.btnWeb} onPress={handleWebsite} activeOpacity={0.8}>
+                  <Ionicons name="globe-outline" size={24} color="#ffffff" />
+                  <Text style={[styles.btnText, isArabic && { fontFamily: 'Cairo_700Bold' }]}>{txt.website}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.emergencyDesc, isArabic && { fontFamily: 'Cairo_400Regular' }, { color: colors.textSecondary }, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+                {txt.heroDesc}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={{ marginTop: s(10) }}>
+            {renderStepIndicator()}
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

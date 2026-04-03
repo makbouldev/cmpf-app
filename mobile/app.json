@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "CMPF Ambulance",
-    "slug": "cmpf-ambulance",
+    "name": "Allo CMPF",
+    "slug": "allo-cmpf",
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/bf037f55-078a-4f66-b42a-d0138c49848a"
     },
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Applogo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/Applogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,16 +22,22 @@
       "package": "com.cmpf.ambulance",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "SCHEDULE_EXACT_ALARM",
+        "WAKE_LOCK",
+        "VIBRATE",
+        "USE_FULL_SCREEN_INTENT",
+        "RECEIVE_BOOT_COMPLETED"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/Applogo.png",
         "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "monochromeImage": "./assets/Applogo.png"
       }
     },
     "plugins": [
+      "./plugins/withAlarmNative",
       "react-native-maps",
       [
         "expo-notifications",

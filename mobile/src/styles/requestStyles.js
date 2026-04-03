@@ -1147,6 +1147,38 @@ export const createRequestStyles = (width) => {
       fontSize: s(18, 15, 20),
       fontWeight: '900',
     },
+    menuOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(15, 25, 40, 0.08)',
+      justifyContent: 'flex-start',
+      paddingTop: s(84, 72, 96),
+      paddingHorizontal: s(14, 10, 20),
+    },
+    menuCard: {
+      alignSelf: 'flex-end',
+      width: s(220, 196, 246),
+      borderRadius: s(18, 16, 22),
+      borderWidth: 1,
+      borderColor: '#dfe7f5',
+      backgroundColor: '#ffffff',
+      paddingVertical: s(8, 6, 10),
+      shadowColor: '#c8d8ea',
+      shadowOpacity: 0.18,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 10,
+    },
+    menuItem: {
+      minHeight: s(46, 42, 54),
+      paddingHorizontal: s(14, 12, 18),
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    menuText: {
+      fontSize: s(14, 12, 16),
+      fontWeight: '700',
+    },
   });
 };
 

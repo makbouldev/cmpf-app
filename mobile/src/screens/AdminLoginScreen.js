@@ -47,12 +47,16 @@ export default function AdminLoginScreen({ onBack, onNavigate, onUpdatePreferenc
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.topBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={onBack}>
-          <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={[styles.title, arBold, { color: colors.textPrimary }]}>{t('admin.title')}</Text>
-        <View style={styles.backBtn} />
+      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.topBar}>
+          <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={onBack}>
+            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.topTitleWrap}>
+            <Text style={[styles.title, arBold, { color: colors.textPrimary }]}>{t('admin.title')}</Text>
+          </View>
+          <View style={styles.placeholderBtn} />
+        </View>
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -87,23 +91,60 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
+    headerCard: {
+      backgroundColor: '#ffffff',
+      borderRadius: s(24, 20, 28),
+      borderWidth: 1,
+      borderColor: '#e2e8f0',
+      paddingHorizontal: s(16, 14, 20),
+      paddingVertical: s(14, 12, 18),
+      marginHorizontal: s(16, 14, 20),
+      marginTop: s(12, 10, 16),
+      marginBottom: s(6, 4, 8),
+      shadowColor: '#0f172a',
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 4,
+    },
     topBar: {
-      minHeight: s(72, 62, 86),
-      borderBottomWidth: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: s(16, 12, 22),
+      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(42, 36, 50),
-      height: s(42, 36, 50),
-      borderRadius: s(12, 10, 16),
-      borderWidth: 1,
+      width: s(44, 38, 48),
+      height: s(44, 38, 48),
+      borderRadius: 999,
       alignItems: 'center',
       justifyContent: 'center',
+      backgroundColor: '#f1f5f9',
+      borderWidth: 1,
+      borderColor: '#e2e8f0',
+      shadowColor: '#0f172a',
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
     },
-    title: { fontSize: s(22, 18, 28), fontWeight: '900' },
+    topTitleWrap: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: s(8, 6, 12),
+    },
+    title: {
+      color: '#0a2540',
+      fontSize: s(17, 15, 20),
+      fontWeight: '900',
+      textAlign: 'center',
+      letterSpacing: -0.3,
+    },
+    placeholderBtn: {
+      width: s(44, 38, 48),
+      height: s(44, 38, 48),
+    },
     card: {
       margin: s(16, 12, 22),
       borderWidth: 1,

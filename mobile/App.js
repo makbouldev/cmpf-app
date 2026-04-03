@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Cairo_400Regular, Cairo_700Bold, useFonts } from '@expo-google-fonts/cairo';
 import AppRouter from './src/navigation/AppRouter';
@@ -7,6 +7,9 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import { I18nProvider } from './src/i18n/I18nContext';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { configureMedicationNotifications } from './src/services/medicationReminders';
+import { AlarmManager } from './src/services/AlarmManager';
+import { AlarmOverlay } from './src/components/AlarmOverlay';
+import './src/services/firebase'; // Initialize Firebase Native SDK
 
 const SETUP_KEY = 'cmpf-app-setup-v1';
 
@@ -21,7 +24,25 @@ export default function App() {
   });
 
   useEffect(() => {
+    // 🧪 Firebase Firestore Connection Test
+    const testConnection = async () => {
+      if (Platform.OS === 'web') return;
+      try {
+        console.log('[FIREBASE] Testing Firestore connection...');
+        const firestore = require('@react-native-firebase/firestore').default;
+        await firestore().collection('ping').limit(1).get();
+        console.log('[FIREBASE] Firestore connection: ✅ SUCCESS');
+      } catch (err) {
+        console.warn('[FIREBASE] Firestore connection: ❌ FAILED', err.message);
+      }
+    };
+    testConnection();
+  }, []);
+
+  useEffect(() => {
     configureMedicationNotifications();
+    AlarmManager.initListeners();
+    AlarmManager.checkStoredAlarm();
   }, []);
 
   useEffect(() => {
@@ -106,6 +127,7 @@ export default function App() {
     <ThemeProvider initialMode={themeMode}>
       <I18nProvider initialLanguage={language}>
         <AppRouter preferences={setup} onUpdatePreferences={handleUpdateSetup} />
+        <AlarmOverlay />
       </I18nProvider>
     </ThemeProvider>
   );

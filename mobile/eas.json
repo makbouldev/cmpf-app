@@ -7,7 +7,7 @@
     "preview": {
       "channel": "preview",
       "distribution": "internal",
-      "credentialsSource": "local",
+      "credentialsSource": "remote",
       "android": {
         "buildType": "apk"
       }

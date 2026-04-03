@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { Audio } from 'expo-av';
+import { scheduleNativeAlarm, cancelNativeAlarm } from './medicationAlarms';
 
 const STORAGE_KEY = 'cmpf-medication-reminders';
 // Keep a versioned channel id because Android channels are mostly immutable after creation.
@@ -85,24 +87,56 @@ export const configureMedicationNotifications = async () => {
       shouldSetBadge: false,
       shouldShowBanner: true,
       shouldShowList: true,
+      priority: Notifications.AndroidNotificationPriority.MAX,
     }),
   });
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Medication reminders',
+      name: 'Medication alarms',
       importance: Notifications.AndroidImportance.MAX,
-      sound: 'default',
+      sound: 'alarm.mp3', // Set to a packaged sound for native experience
       enableVibrate: true,
-      vibrationPattern: [0, 400, 250, 400, 250, 400],
+      vibrationPattern: [0, 500, 200, 500],
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-      bypassDnd: false,
+      bypassDnd: true,
+      showBadge: true,
       audioAttributes: {
         usage: Notifications.AndroidAudioUsage.ALARM,
         contentType: Notifications.AndroidAudioContentType.SONIFICATION,
       },
-      lightColor: '#1796f2',
     });
+  }
+
+  // Listener for foreground notifications
+  Notifications.addNotificationReceivedListener(async (notification) => {
+    const title = notification.request.content.title || '';
+    if (title.includes('Rappel')) {
+      await playMedicationSound();
+    }
+  });
+};
+
+let soundObject = null;
+
+export const playMedicationSound = async () => {
+  try {
+    if (soundObject) {
+      await soundObject.unloadAsync();
+    }
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: 'https://cdn.pixabay.com/audio/2022/03/15/audio_783458cbf2.mp3' }, // Medical beep sound
+      { shouldPlay: true, volume: 1.0 }
+    );
+    soundObject = sound;
+  } catch (error) {
+    console.error('Error playing sound:', error);
+  }
+};
+
+export const stopMedicationSound = async () => {
+  if (soundObject) {
+    await soundObject.stopAsync();
   }
 };
 
@@ -132,26 +166,46 @@ const scheduleReminderNotification = async ({ medicationName, time, notes }) => 
     return null;
   }
 
-  const permission = await requestMedicationNotificationPermission();
-  if (!permission.granted) {
+  try {
+    const permission = await requestMedicationNotificationPermission();
+    if (!permission.granted) {
+      return null;
+    }
+
+    const { hour, minute } = parseTime(time);
+
+    // 1. Schedule Native Alarm (Android Only)
+    try {
+      const triggerDate = new Date();
+      triggerDate.setHours(hour, minute, 0, 0);
+      if (triggerDate < new Date()) triggerDate.setDate(triggerDate.getDate() + 1);
+      scheduleNativeAlarm(`med-${medicationName}-${time}`, medicationName, triggerDate.getTime());
+    } catch (_err) {}
+
+    // 2. Fallback Notification (Standard Expo)
+    return await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `Rappel médicament : ${medicationName}`,
+        body: notes ? notes : "C'est l'heure de prendre votre médicament.",
+        sound: 'alarm.mp3',
+        priority: Notifications.AndroidNotificationPriority.MAX,
+        sticky: true,
+        autoDismiss: false,
+        color: '#ff3b30',
+        interruptionLevel: 'critical',
+        categoryIdentifier: 'medication_alarm',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour,
+        minute,
+        channelId: CHANNEL_ID,
+      },
+    });
+  } catch (err) {
+    console.warn('Could not schedule native notification, relying on in-app clock watcher:', err);
     return null;
   }
-
-  const { hour, minute } = parseTime(time);
-
-  return Notifications.scheduleNotificationAsync({
-    content: {
-      title: `Rappel médicament : ${medicationName}`,
-      body: notes ? notes : "C'est l'heure de prendre votre médicament.",
-      sound: Platform.OS === 'android' ? 'defaultRingtone' : 'default',
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour,
-      minute,
-      channelId: CHANNEL_ID,
-    },
-  });
 };
 
 export const getMedicationReminders = async () => readReminders();
@@ -235,6 +289,26 @@ export const addMedicationReminder = async ({ name, times, notes }) => {
     appendedToExistingMedication: existingIndex >= 0,
     addedTimesCount: createdTimes.length,
   };
+};
+
+export const snoozeMedicationReminder = async (medicationName, notes) => {
+  if (Platform.OS === 'web') return;
+
+  // Schedule a one-time notification in 5 minutes
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: `Rappel médicament : ${medicationName} (Snooze)`,
+      body: notes || "Rappel après 5 minutes.",
+      sound: 'alarm.mp3',
+      priority: Notifications.AndroidNotificationPriority.MAX,
+      sticky: true,
+      interruptionLevel: 'critical',
+    },
+    trigger: {
+      seconds: 5 * 60,
+      channelId: CHANNEL_ID,
+    },
+  });
 };
 
 export const removeMedicationTime = async (medicationId, timeId) => {

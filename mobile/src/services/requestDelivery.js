@@ -21,6 +21,7 @@ const buildBody = ({ type, payload }) => {
     to: toText(payload.toLocation),
     mode: toText(payload.transferMode),
     adresse: toText(payload.address),
+    adresse_destination: toText(payload.destinationAddress),
     notes: toText(payload.notes),
     latitude: toText(payload.lat),
     longitude: toText(payload.lng),
