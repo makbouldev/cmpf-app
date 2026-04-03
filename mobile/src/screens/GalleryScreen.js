@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { createGalleryStyles } from '../styles/galleryStyles';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
-import { createScaler } from '../utils/responsive';
 
 const galleryImages = [
   require('../../assets/19-r4sbjga1qmedxkxilmtadom3nmbuoeu0jj6kovw650 (1).jpg'),
@@ -23,11 +22,9 @@ const galleryImages = [
 export default function GalleryScreen({ onBack }) {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createGalleryStyles(width), [width]);
-  const s = useMemo(() => createScaler(width), [width]);
   const { t, language } = useI18n();
   const { colors, mode } = useAppTheme();
   const isDark = mode === 'dark';
-  const arRegular = language === 'ar' ? { fontFamily: 'Cairo_400Regular' } : null;
   const arBold = language === 'ar' ? { fontFamily: 'Cairo_700Bold' } : null;
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -38,33 +35,28 @@ export default function GalleryScreen({ onBack }) {
   };
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fbfd' }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.topBar}>
-            <TouchableOpacity 
-              style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
-              onPress={onBack}
-            >
-              <Ionicons name="chevron-back" size={s(20, 18, 22)} color={colors.textPrimary} />
-            </TouchableOpacity>
+    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fafc' }]}>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
 
-            <View style={styles.topTitleWrap}>
-              <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
-              <Text style={[styles.topSub, arRegular, { color: colors.textSecondary }]}>{txt.subtitle}</Text>
-            </View>
-
-            <View style={{ width: s(44, 38, 48) }} />
-          </View>
+        <View style={styles.titleWrap}>
+          <Text style={[styles.title, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{txt.subtitle}</Text>
         </View>
 
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.grid}>
           {galleryImages.map((img, idx) => (
-            <TouchableOpacity 
-              key={idx} 
+            <TouchableOpacity
+              key={idx}
               style={[styles.imageItem, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => setSelectedImage(img)}
-              activeOpacity={0.9}
+              activeOpacity={0.85}
             >
               <Image source={img} style={styles.image} resizeMode="cover" />
             </TouchableOpacity>
@@ -75,7 +67,7 @@ export default function GalleryScreen({ onBack }) {
       <Modal visible={!!selectedImage} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.closeButton} onPress={() => setSelectedImage(null)}>
-            <Ionicons name="close-circle" size={40} color="#fff" />
+            <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           {selectedImage && (
             <Image source={selectedImage} style={styles.fullImage} resizeMode="contain" />

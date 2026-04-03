@@ -15,7 +15,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useI18n } from '../i18n/I18nContext';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -61,10 +60,9 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
   const arRegular = isArabic ? { fontFamily: 'Cairo_400Regular' } : null;
   const arBold = isArabic ? { fontFamily: 'Cairo_700Bold' } : null;
 
-  // Form State
   const initialUser = preferences?.account?.user || null;
-  const [interventionType, setInterventionType] = useState('once'); // 'once' | 'continuous'
-  const [doctorPreference, setDoctorPreference] = useState('any'); // 'male' | 'female' | 'any'
+  const [interventionType, setInterventionType] = useState('once');
+  const [doctorPreference, setDoctorPreference] = useState('any');
   const [fullName, setFullName] = useState(initialUser?.name || '');
   const [phone, setPhone] = useState(initialUser?.phone || preferences?.account?.phone || '');
   const [city, setCity] = useState(initialUser?.city || 'Agadir');
@@ -73,78 +71,63 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
   const [submitting, setSubmitting] = useState(false);
   const [successSubmitted, setSuccessSubmitted] = useState(false);
 
-  // Translations
   const txt = {
     topTitle: isArabic ? 'طبيب الطوارئ والمنزل' : language === 'fr' ? 'Médecin urgentiste' : 'Emergency Doctor',
     topSub: isArabic ? 'استشارة ومرافقة طبية بالمنزل 24/7' : language === 'fr' ? 'Consultation & suivi à domicile 24/7' : 'Home consultation & care 24/7',
-    heroBadge: isArabic ? 'خدمة طبية فورية 24/24' : language === 'fr' ? 'SERVICE MÉDICAL 24/24' : '24/7 MEDICAL SERVICE',
     heroTitle: isArabic ? 'طلب طبيب إلى المنزل' : language === 'fr' ? 'Médecin urgentiste à domicile' : 'Emergency Doctor at Home',
     heroDesc: isArabic
-      ? 'فريق من الأطباء العامين والمختصين في طب المستعجلات، جاهزون للتنقل الفوري إلى منزلك لتقديم الفحص والعلاج.'
+      ? 'فريق من الأطباء العامين والمختصين في طب المستعجلات، جاهزون للتنقل الفوري إلى منزلك.'
       : language === 'fr'
-        ? 'Médecins généralistes et urgentistes hautement qualifiés, prêts à intervenir chez vous pour consultation, diagnostic et soins.'
-        : 'Qualified emergency doctors ready to visit your home for urgent consultation, diagnosis and treatment.',
-    responseTime: isArabic ? 'وصول تقديري: 20 إلى 35 دقيقة' : language === 'fr' ? 'Arrivée estimée : 20 à 35 min' : 'Estimated arrival: 20 to 35 min',
-
-    // Section 1: Intervention Type
-    sec1Title: isArabic ? '1. طبيعة التدخل الطبي' : language === 'fr' ? "1. Nature de l'intervention" : '1. Service Type',
-    sec1Sub: isArabic ? 'حدد ما إذا كنت تحتاج فحصاً لمرة واحدة أو مرافقة مستمرة' : language === 'fr' ? 'Visite ponctuelle ou garde continue à domicile' : 'One-time visit or continuous home care',
-    typeOnceTitle: isArabic ? 'استشارة فورية (مرة واحدة)' : language === 'fr' ? 'Visite ponctuelle (1 seule fois)' : 'One-time Urgent Visit',
-    typeOnceBadge: isArabic ? 'مستعجل' : language === 'fr' ? 'Urgence' : 'Urgent',
+        ? 'Médecins généralistes et urgentistes qualifiés, prêts à intervenir chez vous.'
+        : 'Qualified emergency doctors ready to visit your home.',
+    responseTime: isArabic ? '20 - 35 دقيقة' : '20 - 35 min',
+    sec1Title: isArabic ? 'طبيعة التدخل الطبي' : language === 'fr' ? "Nature de l'intervention" : 'Service Type',
+    typeOnceTitle: isArabic ? 'استشارة فورية' : language === 'fr' ? 'Visite ponctuelle' : 'One-time Visit',
     typeOnceDesc: isArabic
-      ? 'فحص طبي فوري، تشخيص للحالة، وتقديم الوصفة الطبية والعلاجات الأولية بالمنزل.'
+      ? 'فحص طبي فوري، تشخيص للحالة، وتقديم الوصفة الطبية.'
       : language === 'fr'
-        ? "Examen clinique complet, diagnostic d'urgence et prescription immédiate à domicile."
-        : 'Emergency physical exam, diagnosis and medical prescription at home.',
-    typeContTitle: isArabic ? 'مرافقة ومبيت طبي مستمر' : language === 'fr' ? 'Garde & Suivi continu à domicile' : 'Continuous Home Care & Guard',
-    typeContBadge: isArabic ? 'مرافقة دائمًا' : language === 'fr' ? '24h/24 ou Nuit' : '24/7 or Night',
+        ? "Examen clinique, diagnostic d'urgence et prescription à domicile."
+        : 'Emergency exam, diagnosis and prescription at home.',
+    typeContTitle: isArabic ? 'مرافقة طبية مستمرة' : language === 'fr' ? 'Garde & Suivi continu' : 'Continuous Care',
     typeContDesc: isArabic
-      ? 'طبيب أو ممرض ملازم للمريض بالمنزل للمراقبة الصحية المستمرة ومتابعة الحالات الحرجة أو ما بعد العمليات.'
+      ? 'طبيب ملازم للمريض بالمنزل للمراقبة الصحية المستمرة.'
       : language === 'fr'
-        ? 'Présence continue d’un médecin ou soignant à domicile pour surveillance permanente et soins continus.'
-        : 'Dedicated doctor or healthcare provider at home for continuous medical supervision.',
-
-    // Section 2: Doctor Preference
-    sec2Title: isArabic ? '2. تفضيل الطبيب المعالج' : language === 'fr' ? '2. Préférence du médecin' : '2. Doctor Preference',
-    sec2Sub: isArabic ? 'اختر طبيباً أو طبيبة حسب رغبتك وراحتك الشخصية' : language === 'fr' ? 'Choisissez un médecin homme ou femme selon votre souhait' : 'Choose male or female doctor as you prefer',
-    drMale: isArabic ? 'طبيب (رجل)' : language === 'fr' ? 'Médecin Homme' : 'Male Doctor',
-    drMaleRole: isArabic ? 'طبيب عام / مستعجلات' : language === 'fr' ? 'Dr. Généraliste / Urgentiste' : 'General Practitioner',
-    drFemale: isArabic ? 'طبيبة (امرأة)' : language === 'fr' ? 'Médecin Femme' : 'Female Doctor',
-    drFemaleRole: isArabic ? 'طبيبة عامة / مستعجلات' : language === 'fr' ? 'Dre. Généraliste / Urgentiste' : 'General Practitioner',
-    drAny: isArabic ? 'الأول المتاح' : language === 'fr' ? 'Premier disponible' : 'First Available',
-    drAnyRole: isArabic ? 'الأسرع وصولاً' : language === 'fr' ? 'Le plus rapide' : 'Fastest arrival',
-
-    // Section 3: Patient Form
-    sec3Title: isArabic ? '3. معلومات المريض والموقع' : language === 'fr' ? '3. Informations du patient' : '3. Patient Information',
-    sec3Sub: isArabic ? 'الرجاء ملء البيانات بدقة لتسهيل وصول الطبيب' : language === 'fr' ? 'Remplissez les détails pour l’intervention' : 'Fill details for medical dispatch',
-    nameLabel: isArabic ? 'الاسم واللقب الكامل' : language === 'fr' ? 'Nom et prénom complet' : 'Full Name',
-    namePlace: isArabic ? 'مثال: محمد العلمي' : language === 'fr' ? 'Ex: Mohamed Alami' : 'Ex: Mohamed Alami',
-    phoneLabel: isArabic ? 'رقم الهاتف للتواصل' : language === 'fr' ? 'Numéro de téléphone' : 'Phone Number',
-    phonePlace: '06 XX XX XX XX / 05 XX XX XX XX',
+        ? "Présence continue d'un médecin à domicile pour surveillance permanente."
+        : 'Dedicated doctor at home for continuous medical supervision.',
+    sec2Title: isArabic ? 'تفضيل الطبيب' : language === 'fr' ? 'Préférence du médecin' : 'Doctor Preference',
+    drMale: isArabic ? 'طبيب' : language === 'fr' ? 'Homme' : 'Male',
+    drMaleRole: isArabic ? 'طبيب عام' : language === 'fr' ? 'Généraliste' : 'General',
+    drFemale: isArabic ? 'طبيبة' : language === 'fr' ? 'Femme' : 'Female',
+    drFemaleRole: isArabic ? 'طبيبة عامة' : language === 'fr' ? 'Généraliste' : 'General',
+    drAny: isArabic ? 'الأول المتاح' : language === 'fr' ? 'Premier dispo.' : 'First Available',
+    drAnyRole: isArabic ? 'الأسرع وصولاً' : language === 'fr' ? 'Le plus rapide' : 'Fastest',
+    sec3Title: isArabic ? 'معلومات المريض' : language === 'fr' ? 'Informations du patient' : 'Patient Information',
+    nameLabel: isArabic ? 'الاسم الكامل' : language === 'fr' ? 'Nom complet' : 'Full Name',
+    namePlace: isArabic ? 'مثال: محمد العلمي' : 'Ex: Mohamed Alami',
+    phoneLabel: isArabic ? 'رقم الهاتف' : language === 'fr' ? 'Téléphone' : 'Phone',
+    phonePlace: '06 XX XX XX XX',
     cityLabel: isArabic ? 'المدينة' : language === 'fr' ? 'Ville' : 'City',
-    cityPlace: isArabic ? 'اكتب مدينتك (مثال: أكادير، الدار البيضاء، مراكش...)' : language === 'fr' ? 'Saisissez votre ville (ex: Agadir, Casablanca...)' : 'Enter your city (e.g. Agadir, Casablanca...)',
-    addressLabel: isArabic ? 'العنوان الدقيق بالمنزل' : language === 'fr' ? 'Adresse complète du domicile' : 'Home Address',
-    addressPlace: isArabic ? 'الحي، اسم الشارع، رقم العمارة أو المنزل، الطابق...' : language === 'fr' ? 'Quartier, Rue, N° Immeuble/Maison, Étage...' : 'District, Street, Building No, Floor...',
-    symptomsLabel: isArabic ? 'وصف الحالة المرضية والأعراض' : language === 'fr' ? 'Description des symptômes / Motif' : 'Symptoms / Medical reason',
+    cityPlace: isArabic ? 'مدينتك' : language === 'fr' ? 'Votre ville' : 'Your city',
+    addressLabel: isArabic ? 'العنوان' : language === 'fr' ? 'Adresse complète' : 'Full Address',
+    addressPlace: isArabic ? 'الحي، الشارع، رقم العمارة...' : language === 'fr' ? 'Quartier, Rue, N°...' : 'District, Street, No...',
+    symptomsLabel: isArabic ? 'الأعراض' : language === 'fr' ? 'Symptômes / Motif' : 'Symptoms',
     symptomsPlace: isArabic
-      ? 'مثال: حمى شديدة، ضيق في التنفس، آلام حادة، مراقبة ضغط الدم، غيار جروح...'
+      ? 'حمى، ضيق تنفس، آلام...'
       : language === 'fr'
-        ? 'Ex: Forte fièvre, douleur thoracique, malaise, suivi post-opératoire...'
-        : 'Ex: High fever, chest pain, dizziness, post-op care...',
-
-    // Buttons & Actions
-    submitBtn: isArabic ? 'تأكيد وإرسال طلب الطبيب' : language === 'fr' ? 'Confirmer la demande médicale' : 'Confirm Doctor Request',
-    callBtn: isArabic ? 'اتصال مباشر بالطوارئ' : language === 'fr' ? 'Appel direct 24/7' : 'Direct Call 24/7',
-    whatsappBtn: isArabic ? 'واتساب مباشر مع التفاصيل' : language === 'fr' ? 'WhatsApp direct' : 'Direct WhatsApp',
-    requiredAlert: isArabic ? 'الرجاء ملء الاسم، رقم الهاتف، المدينة، والعنوان.' : language === 'fr' ? 'Veuillez renseigner le nom, le téléphone, la ville et l’adresse.' : 'Please enter name, phone, city, and address.',
-    successTitle: isArabic ? 'تم إرسال طلبك بنجاح' : language === 'fr' ? 'Demande envoyée avec succès !' : 'Request Sent Successfully!',
+        ? 'Fièvre, douleur, malaise...'
+        : 'Fever, pain, dizziness...',
+    submitBtn: isArabic ? 'تأكيد الطلب' : language === 'fr' ? 'Confirmer la demande' : 'Confirm Request',
+    callBtn: isArabic ? 'اتصال مباشر' : language === 'fr' ? 'Appeler' : 'Call Now',
+    whatsappBtn: isArabic ? 'واتساب' : 'WhatsApp',
+    requiredAlert: isArabic ? 'الرجاء ملء الاسم، الهاتف، المدينة، والعنوان.' : language === 'fr' ? 'Veuillez renseigner le nom, téléphone, ville et adresse.' : 'Please fill name, phone, city, and address.',
+    successTitle: isArabic ? 'تم إرسال طلبك' : language === 'fr' ? 'Demande envoyée !' : 'Request Sent!',
     successDesc: isArabic
-      ? 'يقوم مركز التنسيق الطبي بالاتصال بك هاتفياً في هذه اللحظات لتأكيد انطلاق الطبيب.'
+      ? 'سيتصل بك مركز التنسيق الطبي لتأكيد انطلاق الطبيب.'
       : language === 'fr'
-        ? 'Notre régulateur médical vous contacte immédiatement par téléphone pour confirmer le départ du médecin.'
-        : 'Our medical coordinator is calling you immediately to confirm the doctor departure.',
-    backHome: isArabic ? 'العودة للرئيسية' : language === 'fr' ? "Retour à l'accueil" : 'Back to Home',
-    newRequest: isArabic ? 'طلب آخر' : language === 'fr' ? 'Nouvelle demande' : 'New Request',
+        ? 'Notre régulateur vous contacte pour confirmer le départ du médecin.'
+        : 'Our coordinator will call to confirm the doctor departure.',
+    backHome: isArabic ? 'الرئيسية' : language === 'fr' ? "Retour à l'accueil" : 'Back Home',
+    newRequest: isArabic ? 'طلب جديد' : language === 'fr' ? 'Nouvelle demande' : 'New Request',
   };
 
   const currentCityContacts = useMemo(() => {
@@ -164,7 +147,7 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
         await Linking.openURL(url);
       }
     } catch (_err) {
-      Alert.alert('Erreur', 'Impossible de lancer l’appel.');
+      Alert.alert('Erreur', "Impossible de lancer l'appel.");
     }
   };
 
@@ -175,30 +158,30 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
 
     if (isArabic) {
       return (
-        `السلام عليكم ورحمة الله،\n` +
-        `أرغب في طلب طبيب منزلي من CMPF Assistance:\n` +
+        `السلام عليكم،\n` +
+        `أرغب في طلب طبيب منزلي من CMPF:\n` +
         `• نوع التدخل: ${typeLabel}\n` +
         `• تفضيل الطبيب: ${prefLabel}\n` +
-        `• الاسم الكامل: ${fullName || 'غير محدد'}\n` +
+        `• الاسم: ${fullName || 'غير محدد'}\n` +
         `• الهاتف: ${phone || 'غير محدد'}\n` +
         `• المدينة: ${city || 'غير محدد'}\n` +
         `• العنوان: ${address || 'غير محدد'}\n` +
-        `• الحالة / الأعراض: ${symptoms || 'غير محدد'}\n` +
-        `المرجو التأكيد والتواصل معي في أقرب وقت.`
+        `• الأعراض: ${symptoms || 'غير محدد'}\n` +
+        `المرجو التأكيد.`
       );
     }
 
     return (
-      `Bonjour CMPF Assistance,\n` +
-      `Je souhaite demander une intervention de médecin à domicile :\n` +
-      `• Type d'intervention : ${typeLabel}\n` +
-      `• Préférence médecin : ${prefLabel}\n` +
-      `• Nom complet : ${fullName || 'Non spécifié'}\n` +
-      `• Téléphone : ${phone || 'Non spécifié'}\n` +
+      `Bonjour CMPF,\n` +
+      `Demande médecin à domicile :\n` +
+      `• Type : ${typeLabel}\n` +
+      `• Préférence : ${prefLabel}\n` +
+      `• Nom : ${fullName || 'Non spécifié'}\n` +
+      `• Tél : ${phone || 'Non spécifié'}\n` +
       `• Ville : ${city || 'Non spécifiée'}\n` +
       `• Adresse : ${address || 'Non spécifiée'}\n` +
-      `• Symptômes / Motif : ${symptoms || 'Non spécifié'}\n` +
-      `Merci de confirmer la prise en charge rapide.`
+      `• Symptômes : ${symptoms || 'Non spécifié'}\n` +
+      `Merci de confirmer.`
     );
   };
 
@@ -217,7 +200,7 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
         await Linking.openURL(url);
       }
     } catch (_err) {
-      Alert.alert('Erreur', 'Impossible d’ouvrir WhatsApp.');
+      Alert.alert('Erreur', "Impossible d'ouvrir WhatsApp.");
     }
   };
 
@@ -234,8 +217,8 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
 
     setSubmitting(true);
 
-    const typeLabel = interventionType === 'once' ? 'Visite ponctuelle (1 seule fois)' : 'Garde & Suivi continu à domicile (24h/24)';
-    const prefLabel = doctorPreference === 'male' ? 'Médecin Homme' : doctorPreference === 'female' ? 'Médecin Femme' : 'Premier disponible';
+    const typeLabel = interventionType === 'once' ? 'Visite ponctuelle' : 'Garde & Suivi continu';
+    const prefLabel = doctorPreference === 'male' ? 'Homme' : doctorPreference === 'female' ? 'Femme' : 'Premier disponible';
     const notesSummary = `[Type: ${typeLabel}] [Préférence: ${prefLabel}] [Symptômes: ${symptoms.trim() || 'Non renseigné'}]`;
 
     const payload = {
@@ -248,21 +231,18 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
     };
 
     try {
-      // 1. Send to Backend API
       await createDoctorRequest(payload);
     } catch (apiErr) {
-      console.log('Doctor API warning (will fallback to FormSubmit):', apiErr?.message);
+      console.log('Doctor API warning:', apiErr?.message);
     }
 
     try {
-      // 2. Send via FormSubmit email
       await submitRequestWithFormSubmit({ type: 'doctor-home', payload });
     } catch (fsErr) {
       console.log('FormSubmit warning:', fsErr?.message);
     }
 
     try {
-      // 3. Backup to local AsyncStorage for admin/user history
       const rawStored = await AsyncStorage.getItem('@cmpf_doctor_requests');
       const list = rawStored ? JSON.parse(rawStored) : [];
       list.unshift({
@@ -278,384 +258,237 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
     setSuccessSubmitted(true);
   };
 
+  const dk = isDark;
+  const cardBg = dk ? colors.surface : '#ffffff';
+  const cardBorder = dk ? colors.border : '#e5e7eb';
+  const inputBg = dk ? colors.surfaceAlt : '#f9fafb';
+  const inputBorder = dk ? colors.border : '#d1d5db';
+  const textColor = dk ? colors.textPrimary : '#111827';
+  const textSec = dk ? colors.textSecondary : '#6b7280';
+
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fafc' }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: dk ? colors.background : '#f8fafc' }]}>
+      {/* Header */}
+      <View style={[styles.header, dk && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={styles.headerBack} onPress={onBack} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color={textColor} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: textColor }]}>{txt.topTitle}</Text>
+        <View style={styles.headerBack} />
+      </View>
+
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Navigation Header */}
-        <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.topBar}>
-            <TouchableOpacity
-              style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-              onPress={onBack}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="arrow-back" size={s(20, 18, 24)} color={isDark ? colors.textPrimary : '#203554'} />
-            </TouchableOpacity>
-
-            <View style={styles.topTitleWrap}>
-              <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{txt.topTitle}</Text>
-              <Text style={[styles.topSub, arRegular, { color: colors.textSecondary }]}>{txt.topSub}</Text>
+        {/* Hero Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroIconWrap}>
+              <Ionicons name="medkit" size={20} color="#ffffff" />
             </View>
-
-            <TouchableOpacity
-              style={[styles.topActionBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-              onPress={() => onNavigate?.('settings')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
+            <Text style={[styles.heroTime, arRegular]}>{txt.responseTime}</Text>
+          </View>
+          <Text style={[styles.heroTitle, arBold]}>{txt.heroTitle}</Text>
+          <Text style={[styles.heroDesc, arRegular]}>{txt.heroDesc}</Text>
+          <View style={styles.heroActions}>
+            <TouchableOpacity style={styles.heroCallBtn} onPress={handleCall} activeOpacity={0.85}>
+              <Ionicons name="call" size={16} color="#ffffff" />
+              <Text style={[styles.heroCallText, arBold]}>{txt.callBtn}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.heroWaBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
+              <Ionicons name="logo-whatsapp" size={16} color="#ffffff" />
+              <Text style={[styles.heroWaText, arBold]}>{txt.whatsappBtn}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Hero Card */}
-        <LinearGradient
-          colors={isDark ? ['#0f2942', '#0a1d30'] : ['#0284c7', '#0369a1']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.heroCard}
-        >
-          <View style={styles.heroBadgeRow}>
-            <View style={styles.heroBadge}>
-              <Ionicons name="medkit" size={12} color="#ffffff" style={{ marginRight: 4 }} />
-              <Text style={[styles.heroBadgeText, arBold]}>{txt.heroBadge}</Text>
-            </View>
-            <View style={styles.heroTimeBadge}>
-              <Ionicons name="time" size={12} color="#ffffff" style={{ marginRight: 4 }} />
-              <Text style={[styles.heroTimeText, arBold]}>{txt.responseTime}</Text>
-            </View>
-          </View>
-
-          <Text style={[styles.heroTitle, arBold]}>{txt.heroTitle}</Text>
-          <Text style={[styles.heroDesc, arRegular]}>{txt.heroDesc}</Text>
-
-          {/* Quick Contact Action Bar */}
-          <View style={styles.heroActionsRow}>
-            <TouchableOpacity style={styles.heroCallBtn} onPress={handleCall} activeOpacity={0.9}>
-              <Ionicons name="call" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-              <Text style={[styles.heroActionBtnText, arBold]}>{txt.callBtn}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.heroWhatsappBtn} onPress={handleWhatsApp} activeOpacity={0.9}>
-              <Ionicons name="logo-whatsapp" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-              <Text style={[styles.heroActionBtnText, arBold]}>{txt.whatsappBtn}</Text>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-
-        {/* Success Confirmation Modal / Card */}
         {successSubmitted ? (
-          <View style={[styles.successCard, isDark && { backgroundColor: colors.surface, borderColor: '#10b981' }]}>
-            <View style={styles.successIconCircle}>
-              <Ionicons name="checkmark-done" size={32} color="#ffffff" />
+          <View style={[styles.successCard, dk && { backgroundColor: cardBg, borderColor: '#059669' }]}>
+            <View style={styles.successIcon}>
+              <Ionicons name="checkmark" size={32} color="#ffffff" />
             </View>
-            <Text style={[styles.successTitle, arBold, { color: colors.textPrimary }]}>{txt.successTitle}</Text>
-            <Text style={[styles.successDesc, arRegular, { color: colors.textSecondary }]}>{txt.successDesc}</Text>
-
-            <View style={styles.successBtnsRow}>
-              <TouchableOpacity
-                style={[styles.successCallBtn, { backgroundColor: '#0284c7' }]}
-                onPress={handleCall}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="call" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-                <Text style={[styles.successCallText, arBold]}>{txt.callBtn}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.successHomeBtn, isDark && { backgroundColor: colors.surfaceAlt }]}
-                onPress={onBack}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.successHomeText, arBold, { color: colors.textPrimary }]}>{txt.backHome}</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[styles.successTitle, arBold, { color: textColor }]}>{txt.successTitle}</Text>
+            <Text style={[styles.successDesc, arRegular, { color: textSec }]}>{txt.successDesc}</Text>
+            <TouchableOpacity style={styles.successCallBtn} onPress={handleCall} activeOpacity={0.85}>
+              <Ionicons name="call" size={16} color="#ffffff" />
+              <Text style={[styles.successCallText, arBold]}>{txt.callBtn}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.successBackBtn, dk && { backgroundColor: colors.surfaceAlt }]}
+              onPress={onBack}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.successBackText, arBold, { color: textColor }]}>{txt.backHome}</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <>
-            {/* SECTION 1: Nature de l'intervention (Visite ponctuelle vs Garde continue) */}
-            <View style={[styles.sectionContainer, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.sectionNumberBadge, { backgroundColor: 'rgba(2, 132, 199, 0.12)' }]}>
-                  <Ionicons name="calendar-outline" size={16} color="#0284c7" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.sec1Title}</Text>
-                  <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.sec1Sub}</Text>
-                </View>
-              </View>
+            {/* Section 1: Intervention Type */}
+            <View style={[styles.section, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+              <Text style={[styles.sectionTitle, arBold, { color: textColor }]}>{txt.sec1Title}</Text>
 
-              <View style={styles.choiceCardsCol}>
-                {/* Option A: Visite ponctuelle */}
-                <TouchableOpacity
-                  style={[
-                    styles.choiceCard,
-                    interventionType === 'once' && styles.choiceCardActive,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                    isDark && interventionType === 'once' && { borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.15)' },
-                  ]}
-                  onPress={() => setInterventionType('once')}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.choiceCardTop}>
-                    <View style={styles.choiceIconBadge}>
-                      <Ionicons name="flash" size={18} color="#0284c7" />
-                    </View>
-                    <View style={{ flex: 1, paddingHorizontal: 8 }}>
-                      <Text style={[styles.choiceCardTitle, arBold, { color: colors.textPrimary }]}>{txt.typeOnceTitle}</Text>
-                      <View style={[styles.choiceBadgeTag, isDark && { backgroundColor: 'rgba(2, 132, 199, 0.2)', borderColor: '#0284c7' }]}>
-                        <Text style={[styles.choiceBadgeTagText, arBold, isDark && { color: '#38bdf8' }]}>{txt.typeOnceBadge}</Text>
-                      </View>
-                    </View>
-                    <View style={[styles.radioCircle, interventionType === 'once' && styles.radioCircleActive]}>
-                      {interventionType === 'once' && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <Text style={[styles.choiceCardDesc, arRegular, { color: colors.textSecondary }]}>{txt.typeOnceDesc}</Text>
-                </TouchableOpacity>
-
-                {/* Option B: Garde & Suivi continu */}
-                <TouchableOpacity
-                  style={[
-                    styles.choiceCard,
-                    interventionType === 'continuous' && styles.choiceCardActive,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                    isDark && interventionType === 'continuous' && { borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.15)' },
-                  ]}
-                  onPress={() => setInterventionType('continuous')}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.choiceCardTop}>
-                    <View style={[styles.choiceIconBadge, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                      <Ionicons name="bed" size={18} color="#10b981" />
-                    </View>
-                    <View style={{ flex: 1, paddingHorizontal: 8 }}>
-                      <Text style={[styles.choiceCardTitle, arBold, { color: colors.textPrimary }]}>{txt.typeContTitle}</Text>
-                      <View style={[styles.choiceBadgeTag, { backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }, isDark && { backgroundColor: 'rgba(16, 185, 129, 0.2)', borderColor: '#059669' }]}>
-                        <Text style={[styles.choiceBadgeTagText, arBold, { color: '#047857' }, isDark && { color: '#34d399' }]}>{txt.typeContBadge}</Text>
-                      </View>
-                    </View>
-                    <View style={[styles.radioCircle, interventionType === 'continuous' && styles.radioCircleActive]}>
-                      {interventionType === 'continuous' && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <Text style={[styles.choiceCardDesc, arRegular, { color: colors.textSecondary }]}>{txt.typeContDesc}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* SECTION 2: Préférence du Médecin (Cartoon 3D avatars) */}
-            <View style={[styles.sectionContainer, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.sectionNumberBadge, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-                  <Ionicons name="people-outline" size={16} color="#10b981" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.sec2Title}</Text>
-                  <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.sec2Sub}</Text>
-                </View>
-              </View>
-
-              {/* 3 Doctor Preference Cards */}
-              <View style={styles.doctorCardsRow}>
-                {/* Doctor Male */}
-                <TouchableOpacity
-                  style={[
-                    styles.doctorCard,
-                    doctorPreference === 'male' && styles.doctorCardActive,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                    isDark && doctorPreference === 'male' && { borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.18)' },
-                  ]}
-                  onPress={() => setDoctorPreference('male')}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.doctorImgWrap}>
-                    <Image source={doctorMaleImg} style={styles.doctorCartoonImg} resizeMode="cover" />
-                    {doctorPreference === 'male' && (
-                      <View style={styles.doctorActiveCheck}>
-                        <Ionicons name="checkmark" size={12} color="#ffffff" />
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.doctorName, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
-                    {txt.drMale}
-                  </Text>
-                  <Text style={[styles.doctorRole, arRegular, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {txt.drMaleRole}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Doctor Female */}
-                <TouchableOpacity
-                  style={[
-                    styles.doctorCard,
-                    doctorPreference === 'female' && styles.doctorCardActive,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                    isDark && doctorPreference === 'female' && { borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.18)' },
-                  ]}
-                  onPress={() => setDoctorPreference('female')}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.doctorImgWrap}>
-                    <Image source={doctorFemaleImg} style={styles.doctorCartoonImg} resizeMode="cover" />
-                    {doctorPreference === 'female' && (
-                      <View style={styles.doctorActiveCheck}>
-                        <Ionicons name="checkmark" size={12} color="#ffffff" />
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.doctorName, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
-                    {txt.drFemale}
-                  </Text>
-                  <Text style={[styles.doctorRole, arRegular, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {txt.drFemaleRole}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* First Available */}
-                <TouchableOpacity
-                  style={[
-                    styles.doctorCard,
-                    doctorPreference === 'any' && styles.doctorCardActive,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                    isDark && doctorPreference === 'any' && { borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.18)' },
-                  ]}
-                  onPress={() => setDoctorPreference('any')}
-                  activeOpacity={0.85}
-                >
-                  <View style={[styles.doctorImgWrap, styles.doctorAnyAvatarWrap, isDark && { backgroundColor: 'rgba(2, 132, 199, 0.2)', borderColor: '#0284c7' }]}>
-                    <Ionicons name="flash" size={28} color="#0284c7" />
-                    {doctorPreference === 'any' && (
-                      <View style={styles.doctorActiveCheck}>
-                        <Ionicons name="checkmark" size={12} color="#ffffff" />
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.doctorName, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
-                    {txt.drAny}
-                  </Text>
-                  <Text style={[styles.doctorRole, arRegular, { color: '#0284c7' }]} numberOfLines={1}>
-                    {txt.drAnyRole}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* SECTION 3: Formulaire du Patient & Adresse */}
-            <View style={[styles.sectionContainer, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.sectionNumberBadge, { backgroundColor: 'rgba(239, 68, 68, 0.12)' }]}>
-                  <Ionicons name="person-outline" size={16} color="#ef4444" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.sec3Title}</Text>
-                  <Text style={[styles.sectionSub, arRegular, { color: colors.textSecondary }]}>{txt.sec3Sub}</Text>
-                </View>
-              </View>
-
-              {/* Nom & Prénom */}
-              <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, arBold, { color: colors.textPrimary }]}>{txt.nameLabel} *</Text>
-                <View style={[styles.inputBox, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-                  <Ionicons name="person" size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
-                  <TextInput
-                    style={[styles.textInput, arRegular, { color: colors.textPrimary }]}
-                    placeholder={txt.namePlace}
-                    placeholderTextColor={colors.textSecondary}
-                    value={fullName}
-                    onChangeText={setFullName}
-                  />
-                </View>
-              </View>
-
-              {/* Téléphone */}
-              <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, arBold, { color: colors.textPrimary }]}>{txt.phoneLabel} *</Text>
-                <View style={[styles.inputBox, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-                  <Ionicons name="call" size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
-                  <TextInput
-                    style={[styles.textInput, { color: colors.textPrimary }]}
-                    placeholder={txt.phonePlace}
-                    placeholderTextColor={colors.textSecondary}
-                    keyboardType="phone-pad"
-                    value={phone}
-                    onChangeText={setPhone}
-                  />
-                </View>
-              </View>
-
-              {/* Ville Input */}
-              <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, arBold, { color: colors.textPrimary }]}>{txt.cityLabel} *</Text>
-                <View style={[styles.inputBox, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-                  <Ionicons name="business" size={18} color="#0284c7" style={{ marginRight: 8 }} />
-                  <TextInput
-                    style={[styles.textInput, arRegular, { color: colors.textPrimary }]}
-                    placeholder={txt.cityPlace}
-                    placeholderTextColor={colors.textSecondary}
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                </View>
-              </View>
-
-              {/* Adresse Complète */}
-              <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, arBold, { color: colors.textPrimary }]}>{txt.addressLabel} *</Text>
-                <View style={[styles.inputBox, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-                  <Ionicons name="location" size={18} color="#ef4444" style={{ marginRight: 8 }} />
-                  <TextInput
-                    style={[styles.textInput, arRegular, { color: colors.textPrimary }]}
-                    placeholder={txt.addressPlace}
-                    placeholderTextColor={colors.textSecondary}
-                    value={address}
-                    onChangeText={setAddress}
-                  />
-                </View>
-              </View>
-
-              {/* Symptômes / Description */}
-              <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, arBold, { color: colors.textPrimary }]}>{txt.symptomsLabel}</Text>
-                <View
-                  style={[
-                    styles.inputBox,
-                    styles.textareaBox,
-                    isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-                  ]}
-                >
-                  <TextInput
-                    style={[styles.textInput, styles.textarea, arRegular, { color: colors.textPrimary }]}
-                    placeholder={txt.symptomsPlace}
-                    placeholderTextColor={colors.textSecondary}
-                    multiline
-                    numberOfLines={3}
-                    textAlignVertical="top"
-                    value={symptoms}
-                    onChangeText={setSymptoms}
-                  />
-                </View>
-              </View>
-
-              {/* Submit Button */}
               <TouchableOpacity
-                style={[styles.submitBtn, submitting && { opacity: 0.7 }]}
+                style={[
+                  styles.optionCard,
+                  { borderColor: cardBorder },
+                  dk && { backgroundColor: colors.surfaceAlt },
+                  interventionType === 'once' && styles.optionCardSelected,
+                  dk && interventionType === 'once' && { borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)' },
+                ]}
+                onPress={() => setInterventionType('once')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.optionRow}>
+                  <View style={styles.optionContent}>
+                    <Text style={[styles.optionTitle, arBold, { color: textColor }]}>{txt.typeOnceTitle}</Text>
+                    <Text style={[styles.optionDesc, arRegular, { color: textSec }]}>{txt.typeOnceDesc}</Text>
+                  </View>
+                  <View style={[styles.radio, interventionType === 'once' && styles.radioSelected]}>
+                    {interventionType === 'once' && <View style={styles.radioDot} />}
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.optionCard,
+                  { borderColor: cardBorder },
+                  dk && { backgroundColor: colors.surfaceAlt },
+                  interventionType === 'continuous' && styles.optionCardSelected,
+                  dk && interventionType === 'continuous' && { borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)' },
+                ]}
+                onPress={() => setInterventionType('continuous')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.optionRow}>
+                  <View style={styles.optionContent}>
+                    <Text style={[styles.optionTitle, arBold, { color: textColor }]}>{txt.typeContTitle}</Text>
+                    <Text style={[styles.optionDesc, arRegular, { color: textSec }]}>{txt.typeContDesc}</Text>
+                  </View>
+                  <View style={[styles.radio, interventionType === 'continuous' && styles.radioSelected]}>
+                    {interventionType === 'continuous' && <View style={styles.radioDot} />}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* Section 2: Doctor Preference */}
+            <View style={[styles.section, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+              <Text style={[styles.sectionTitle, arBold, { color: textColor }]}>{txt.sec2Title}</Text>
+              <View style={styles.doctorRow}>
+                {[
+                  { key: 'male', img: doctorMaleImg, label: txt.drMale, sub: txt.drMaleRole },
+                  { key: 'female', img: doctorFemaleImg, label: txt.drFemale, sub: txt.drFemaleRole },
+                  { key: 'any', img: null, label: txt.drAny, sub: txt.drAnyRole },
+                ].map((doc) => {
+                  const active = doctorPreference === doc.key;
+                  return (
+                    <TouchableOpacity
+                      key={doc.key}
+                      style={[
+                        styles.doctorCard,
+                        { borderColor: cardBorder },
+                        dk && { backgroundColor: colors.surfaceAlt },
+                        active && styles.doctorCardSelected,
+                        dk && active && { borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)' },
+                      ]}
+                      onPress={() => setDoctorPreference(doc.key)}
+                      activeOpacity={0.8}
+                    >
+                      {doc.img ? (
+                        <View style={[styles.doctorAvatar, active && { borderColor: '#2563eb' }]}>
+                          <Image source={doc.img} style={styles.doctorAvatarImg} resizeMode="cover" />
+                        </View>
+                      ) : (
+                        <View style={[styles.doctorAvatar, styles.doctorAvatarIcon, active && { borderColor: '#2563eb', backgroundColor: '#eff6ff' }]}>
+                          <Ionicons name="flash" size={22} color="#2563eb" />
+                        </View>
+                      )}
+                      <Text style={[styles.doctorLabel, arBold, { color: textColor }]} numberOfLines={1}>{doc.label}</Text>
+                      <Text style={[styles.doctorSub, arRegular, { color: textSec }]} numberOfLines={1}>{doc.sub}</Text>
+                      {active && (
+                        <View style={styles.doctorCheck}>
+                          <Ionicons name="checkmark" size={10} color="#ffffff" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Section 3: Patient Info */}
+            <View style={[styles.section, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+              <Text style={[styles.sectionTitle, arBold, { color: textColor }]}>{txt.sec3Title}</Text>
+
+              <View style={styles.field}>
+                <Text style={[styles.label, arBold, { color: textColor }]}>{txt.nameLabel} *</Text>
+                <TextInput
+                  style={[styles.input, arRegular, { color: textColor, backgroundColor: inputBg, borderColor: inputBorder }]}
+                  placeholder={txt.namePlace}
+                  placeholderTextColor={textSec}
+                  value={fullName}
+                  onChangeText={setFullName}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={[styles.label, arBold, { color: textColor }]}>{txt.phoneLabel} *</Text>
+                <TextInput
+                  style={[styles.input, { color: textColor, backgroundColor: inputBg, borderColor: inputBorder }]}
+                  placeholder={txt.phonePlace}
+                  placeholderTextColor={textSec}
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={[styles.label, arBold, { color: textColor }]}>{txt.cityLabel} *</Text>
+                <TextInput
+                  style={[styles.input, arRegular, { color: textColor, backgroundColor: inputBg, borderColor: inputBorder }]}
+                  placeholder={txt.cityPlace}
+                  placeholderTextColor={textSec}
+                  value={city}
+                  onChangeText={setCity}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={[styles.label, arBold, { color: textColor }]}>{txt.addressLabel} *</Text>
+                <TextInput
+                  style={[styles.input, arRegular, { color: textColor, backgroundColor: inputBg, borderColor: inputBorder }]}
+                  placeholder={txt.addressPlace}
+                  placeholderTextColor={textSec}
+                  value={address}
+                  onChangeText={setAddress}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={[styles.label, arBold, { color: textColor }]}>{txt.symptomsLabel}</Text>
+                <TextInput
+                  style={[styles.input, styles.textarea, arRegular, { color: textColor, backgroundColor: inputBg, borderColor: inputBorder }]}
+                  placeholder={txt.symptomsPlace}
+                  placeholderTextColor={textSec}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  value={symptoms}
+                  onChangeText={setSymptoms}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitBtn, submitting && { opacity: 0.6 }]}
                 onPress={handleSubmit}
                 disabled={submitting}
-                activeOpacity={0.9}
+                activeOpacity={0.85}
               >
-                <LinearGradient
-                  colors={['#0284c7', '#0369a1']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.submitBtnGradient}
-                >
-                  {submitting ? (
-                    <ActivityIndicator color="#ffffff" size="small" />
-                  ) : (
-                    <>
-                      <Ionicons name="checkmark-circle" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                      <Text style={[styles.submitBtnText, arBold]}>{txt.submitBtn}</Text>
-                    </>
-                  )}
-                </LinearGradient>
+                {submitting ? (
+                  <ActivityIndicator color="#ffffff" size="small" />
+                ) : (
+                  <Text style={[styles.submitText, arBold]}>{txt.submitBtn}</Text>
+                )}
               </TouchableOpacity>
             </View>
           </>
@@ -667,151 +500,78 @@ export default function DoctorScreen({ onNavigate, onBack, preferences }) {
 
 const createStyles = (width) => {
   const s = createScaler(width);
-  const isNarrow = width <= 390;
-  const horizontal = isNarrow ? s(14, 12, 18) : s(20, 16, 26);
+  const px = width <= 390 ? s(14, 12, 18) : s(20, 16, 26);
 
   return StyleSheet.create({
-    screen: {
-      flex: 1,
-    },
-    content: {
-      paddingHorizontal: horizontal,
-      paddingTop: s(12, 10, 16),
-      paddingBottom: s(36, 28, 44),
-      gap: s(14, 12, 18),
-    },
+    screen: { flex: 1 },
 
-    // Header Card (identical to PharmaciesScreen)
-    headerCard: {
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
+      paddingHorizontal: px,
+      paddingVertical: s(12, 10, 16),
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
     },
-    topBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
-    },
-    backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+    headerBack: {
+      width: 40,
+      height: 40,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
-    },
-    topTitle: {
-      fontSize: s(17, 15, 20),
+      textAlign: 'center',
+      fontSize: s(17, 15, 19),
       fontWeight: '700',
-      color: '#0f172a',
-      textAlign: 'center',
-    },
-    topSub: {
-      fontSize: s(12, 11, 14),
-      color: '#64748b',
-      marginTop: 2,
-      textAlign: 'center',
-    },
-    topActionBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
     },
 
-    // Hero Card
-    heroCard: {
-      borderRadius: s(24, 20, 28),
-      padding: s(18, 16, 22),
-      shadowColor: '#0284c7',
-      shadowOpacity: 0.22,
-      shadowRadius: 18,
-      shadowOffset: { width: 0, height: 8 },
-      elevation: 6,
+    content: {
+      padding: px,
+      paddingBottom: s(40, 32, 48),
+      gap: s(16, 14, 20),
     },
-    heroBadgeRow: {
+
+    heroCard: {
+      backgroundColor: '#2563eb',
+      borderRadius: 16,
+      padding: s(20, 16, 24),
+    },
+    heroTopRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: s(10, 8, 12),
-      flexWrap: 'wrap',
-      gap: 6,
+      marginBottom: s(12, 10, 14),
     },
-    heroBadge: {
-      flexDirection: 'row',
+    heroIconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: 'rgba(255,255,255,0.2)',
       alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      paddingHorizontal: s(10, 8, 12),
-      paddingVertical: s(4, 3, 6),
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.3)',
+      justifyContent: 'center',
     },
-    heroBadgeText: {
-      color: '#ffffff',
-      fontSize: s(11, 10, 12),
-      fontWeight: '700',
-      letterSpacing: 0.5,
-    },
-    heroTimeBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      paddingHorizontal: s(10, 8, 12),
-      paddingVertical: s(4, 3, 6),
-      borderRadius: 999,
-    },
-    heroTimeText: {
-      color: '#ffffff',
-      fontSize: s(11, 10, 12),
+    heroTime: {
+      color: 'rgba(255,255,255,0.85)',
+      fontSize: s(13, 11, 14),
       fontWeight: '600',
     },
     heroTitle: {
       color: '#ffffff',
-      fontSize: s(20, 18, 24),
+      fontSize: s(20, 17, 23),
       fontWeight: '800',
       marginBottom: s(6, 4, 8),
     },
     heroDesc: {
-      color: 'rgba(255, 255, 255, 0.92)',
-      fontSize: s(12.5, 11.5, 14),
-      lineHeight: s(18, 16, 20),
-      marginBottom: s(14, 12, 16),
+      color: 'rgba(255,255,255,0.8)',
+      fontSize: s(13, 12, 15),
+      lineHeight: s(19, 17, 21),
+      marginBottom: s(16, 12, 18),
     },
-    heroActionsRow: {
+    heroActions: {
       flexDirection: 'row',
-      alignItems: 'center',
       gap: s(10, 8, 12),
     },
     heroCallBtn: {
@@ -819,372 +579,248 @@ const createStyles = (width) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#ef4444',
-      paddingVertical: s(10, 8, 12),
-      borderRadius: s(14, 12, 16),
-      shadowColor: '#ef4444',
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
+      gap: 6,
+      backgroundColor: '#dc2626',
+      height: 44,
+      borderRadius: 10,
     },
-    heroWhatsappBtn: {
+    heroCallText: {
+      color: '#ffffff',
+      fontSize: s(13, 12, 14),
+      fontWeight: '700',
+    },
+    heroWaBtn: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#10b981',
-      paddingVertical: s(10, 8, 12),
-      borderRadius: s(14, 12, 16),
-      shadowColor: '#10b981',
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
+      gap: 6,
+      backgroundColor: '#059669',
+      height: 44,
+      borderRadius: 10,
     },
-    heroActionBtnText: {
+    heroWaText: {
       color: '#ffffff',
-      fontSize: s(12.5, 11.5, 14),
+      fontSize: s(13, 12, 14),
       fontWeight: '700',
     },
 
-    // Sections
-    sectionContainer: {
+    section: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
+      borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#e2e8f0',
-      padding: s(16, 14, 20),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 14,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
-      gap: s(12, 10, 14),
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: s(10, 8, 12),
-      marginBottom: 2,
-    },
-    sectionNumberBadge: {
-      width: s(36, 32, 40),
-      height: s(36, 32, 40),
-      borderRadius: s(12, 10, 14),
-      alignItems: 'center',
-      justifyContent: 'center',
+      borderColor: '#e5e7eb',
+      padding: s(18, 14, 22),
+      gap: s(14, 12, 16),
+      shadowColor: '#000000',
+      shadowOpacity: 0.04,
+      shadowRadius: 3,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 2,
     },
     sectionTitle: {
-      fontSize: s(15.5, 14, 17),
+      fontSize: s(17, 15, 19),
       fontWeight: '700',
-      color: '#0f172a',
-    },
-    sectionSub: {
-      fontSize: s(11.5, 10.5, 13),
-      color: '#64748b',
-      marginTop: 1,
     },
 
-    // Choice Cards (Visite vs Garde)
-    choiceCardsCol: {
-      gap: s(10, 8, 12),
-    },
-    choiceCard: {
-      backgroundColor: '#f8fafc',
-      borderRadius: s(18, 16, 20),
-      borderWidth: 1.5,
-      borderColor: '#e2e8f0',
+    optionCard: {
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderRadius: 12,
       padding: s(14, 12, 16),
+      backgroundColor: '#ffffff',
     },
-    choiceCardActive: {
-      borderColor: '#0284c7',
-      backgroundColor: '#f0f9ff',
+    optionCardSelected: {
+      borderWidth: 2,
+      borderColor: '#2563eb',
+      backgroundColor: '#eff6ff',
     },
-    choiceCardTop: {
+    optionRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: s(6, 4, 8),
     },
-    choiceIconBadge: {
-      width: s(36, 32, 40),
-      height: s(36, 32, 40),
-      borderRadius: 999,
-      backgroundColor: 'rgba(2, 132, 199, 0.12)',
-      alignItems: 'center',
-      justifyContent: 'center',
+    optionContent: {
+      flex: 1,
+      paddingRight: 12,
     },
-    choiceCardTitle: {
-      fontSize: s(14, 13, 16),
+    optionTitle: {
+      fontSize: s(15, 13, 16),
       fontWeight: '700',
-      color: '#0f172a',
+      marginBottom: 4,
     },
-    choiceBadgeTag: {
-      alignSelf: 'flex-start',
-      backgroundColor: '#e0f2fe',
-      borderWidth: 1,
-      borderColor: '#bae6fd',
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 999,
-      marginTop: 2,
+    optionDesc: {
+      fontSize: s(12, 11, 13),
+      lineHeight: s(17, 15, 19),
     },
-    choiceBadgeTagText: {
-      fontSize: s(10, 9, 11),
-      color: '#0369a1',
-      fontWeight: '700',
-    },
-    choiceCardDesc: {
-      fontSize: s(11.5, 10.5, 13),
-      lineHeight: s(16, 14, 18),
-      color: '#64748b',
-    },
-    radioCircle: {
+    radio: {
       width: 22,
       height: 22,
       borderRadius: 11,
       borderWidth: 2,
-      borderColor: '#cbd5e1',
+      borderColor: '#d1d5db',
       alignItems: 'center',
       justifyContent: 'center',
     },
-    radioCircleActive: {
-      borderColor: '#0284c7',
+    radioSelected: {
+      borderColor: '#2563eb',
     },
-    radioInner: {
+    radioDot: {
       width: 12,
       height: 12,
       borderRadius: 6,
-      backgroundColor: '#0284c7',
+      backgroundColor: '#2563eb',
     },
 
-    // Doctor Avatar Selection Row
-    doctorCardsRow: {
+    doctorRow: {
       flexDirection: 'row',
       gap: s(10, 8, 12),
-      marginTop: 4,
     },
     doctorCard: {
       flex: 1,
-      backgroundColor: '#f8fafc',
-      borderRadius: s(18, 16, 20),
-      borderWidth: 1.5,
-      borderColor: '#e2e8f0',
-      paddingVertical: s(12, 10, 14),
-      paddingHorizontal: s(6, 4, 8),
       alignItems: 'center',
-      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderRadius: 12,
+      paddingVertical: s(14, 12, 16),
+      paddingHorizontal: s(6, 4, 8),
+      backgroundColor: '#ffffff',
     },
-    doctorCardActive: {
-      borderColor: '#0284c7',
-      backgroundColor: '#f0f9ff',
-      shadowColor: '#0284c7',
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
-    },
-    doctorImgWrap: {
-      position: 'relative',
-      width: s(64, 56, 72),
-      height: s(64, 56, 72),
-      borderRadius: 999,
-      marginBottom: s(8, 6, 10),
+    doctorCardSelected: {
       borderWidth: 2,
-      borderColor: '#cbd5e1',
-      overflow: 'hidden',
+      borderColor: '#2563eb',
+      backgroundColor: '#eff6ff',
     },
-    doctorCartoonImg: {
+    doctorAvatar: {
+      width: s(56, 48, 64),
+      height: s(56, 48, 64),
+      borderRadius: 999,
+      borderWidth: 2,
+      borderColor: '#d1d5db',
+      overflow: 'hidden',
+      marginBottom: s(8, 6, 10),
+    },
+    doctorAvatarImg: {
       width: '100%',
       height: '100%',
     },
-    doctorAnyAvatarWrap: {
-      backgroundColor: '#e0f2fe',
+    doctorAvatarIcon: {
+      backgroundColor: '#f0f9ff',
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: '#7dd3fc',
+      borderColor: '#bfdbfe',
     },
-    doctorActiveCheck: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: '#10b981',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: '#ffffff',
-    },
-    doctorName: {
-      fontSize: s(12.5, 11.5, 14),
+    doctorLabel: {
+      fontSize: s(13, 11, 14),
       fontWeight: '700',
-      color: '#0f172a',
       textAlign: 'center',
     },
-    doctorRole: {
-      fontSize: s(10, 9, 11),
-      color: '#64748b',
+    doctorSub: {
+      fontSize: s(11, 10, 12),
       textAlign: 'center',
       marginTop: 2,
     },
+    doctorCheck: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: '#2563eb',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-    // Form inputs
-    fieldWrap: {
+    field: {
       gap: 6,
     },
-    fieldLabel: {
+    label: {
       fontSize: s(13, 12, 14),
-      fontWeight: '700',
-      color: '#334155',
+      fontWeight: '600',
     },
-    inputBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#f8fafc',
-      borderRadius: s(14, 12, 16),
+    input: {
+      height: 48,
+      borderRadius: 10,
       borderWidth: 1,
-      borderColor: '#e2e8f0',
-      paddingHorizontal: s(12, 10, 14),
-      paddingVertical: s(10, 8, 12),
-    },
-    textareaBox: {
-      alignItems: 'flex-start',
-      minHeight: s(80, 70, 90),
-    },
-    textInput: {
-      flex: 1,
-      fontSize: s(13.5, 12.5, 15),
-      color: '#0f172a',
-      padding: 0,
+      borderColor: '#d1d5db',
+      paddingHorizontal: 14,
+      fontSize: s(15, 13, 16),
+      backgroundColor: '#f9fafb',
     },
     textarea: {
-      minHeight: s(60, 50, 70),
+      height: 90,
+      paddingTop: 12,
+      paddingBottom: 12,
+      textAlignVertical: 'top',
     },
 
-    // City selector pills
-    cityPillsRow: {
-      flexDirection: 'row',
-      gap: 8,
-      paddingVertical: 4,
+    submitBtn: {
+      height: 52,
+      borderRadius: 12,
+      backgroundColor: '#dc2626',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
     },
-    cityPill: {
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      paddingHorizontal: s(14, 12, 16),
-      paddingVertical: s(8, 6, 10),
-      borderRadius: 999,
-    },
-    cityPillActive: {
-      backgroundColor: '#0284c7',
-      borderColor: '#0284c7',
-    },
-    cityPillText: {
-      fontSize: s(12, 11, 13),
-      fontWeight: '600',
-      color: '#475569',
-    },
-    cityPillTextActive: {
+    submitText: {
       color: '#ffffff',
+      fontSize: s(16, 14, 17),
       fontWeight: '700',
     },
 
-    // Submit button
-    submitBtn: {
-      borderRadius: s(16, 14, 18),
-      overflow: 'hidden',
-      marginTop: 8,
-      shadowColor: '#0284c7',
-      shadowOpacity: 0.28,
-      shadowRadius: 14,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    submitBtnGradient: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: s(14, 12, 16),
-      paddingHorizontal: s(16, 14, 20),
-    },
-    submitBtnText: {
-      color: '#ffffff',
-      fontSize: s(15, 14, 17),
-      fontWeight: '800',
-    },
-
-    // Success Card
     successCard: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 2,
-      borderColor: '#10b981',
-      padding: s(24, 20, 28),
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      padding: s(28, 22, 32),
       alignItems: 'center',
-      shadowColor: '#10b981',
-      shadowOpacity: 0.2,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-      gap: s(12, 10, 14),
+      gap: s(14, 12, 16),
     },
-    successIconCircle: {
-      width: s(64, 56, 72),
-      height: s(64, 56, 72),
-      borderRadius: 999,
-      backgroundColor: '#10b981',
+    successIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: '#059669',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#10b981',
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
     },
     successTitle: {
-      fontSize: s(18, 16, 21),
+      fontSize: s(19, 17, 22),
       fontWeight: '800',
-      color: '#0f172a',
       textAlign: 'center',
     },
     successDesc: {
-      fontSize: s(13, 12, 14.5),
-      lineHeight: s(19, 17, 21),
-      color: '#64748b',
+      fontSize: s(14, 12, 15),
+      lineHeight: s(20, 18, 22),
       textAlign: 'center',
     },
-    successBtnsRow: {
-      width: '100%',
-      gap: 10,
-      marginTop: 8,
-    },
     successCallBtn: {
+      width: '100%',
       flexDirection: 'row',
+      height: 48,
+      borderRadius: 12,
+      backgroundColor: '#2563eb',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: s(12, 10, 14),
-      borderRadius: s(14, 12, 16),
+      gap: 6,
     },
     successCallText: {
       color: '#ffffff',
-      fontSize: s(14, 13, 15),
+      fontSize: s(15, 13, 16),
       fontWeight: '700',
     },
-    successHomeBtn: {
+    successBackBtn: {
+      width: '100%',
+      height: 48,
+      borderRadius: 12,
+      backgroundColor: '#f3f4f6',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: s(12, 10, 14),
-      borderRadius: s(14, 12, 16),
-      backgroundColor: '#f1f5f9',
     },
-    successHomeText: {
-      fontSize: s(14, 13, 15),
+    successBackText: {
+      fontSize: s(15, 13, 16),
       fontWeight: '700',
-      color: '#334155',
     },
   });
 };

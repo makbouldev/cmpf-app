@@ -33,13 +33,11 @@ export default function SettingsScreen({ onBack, onUpdatePreferences }) {
   const arRegular = isArabic ? { fontFamily: 'Cairo_400Regular' } : null;
   const arBold = isArabic ? { fontFamily: 'Cairo_700Bold' } : null;
 
-  // Real permission states - start as false (unconfigured / green)
   const [overlayEnabled, setOverlayEnabled] = useState(false);
   const [batteryEnabled, setBatteryEnabled] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const pendingPermRef = useRef(null);
 
-  // Check real notifications permission from OS
   const checkRealNotificationPermission = async () => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -56,15 +54,12 @@ export default function SettingsScreen({ onBack, onUpdatePreferences }) {
     }
   };
 
-  // Verify all permissions status
   const verifyAllPermissions = async () => {
     try {
       const realNotif = await checkRealNotificationPermission();
       setNotifEnabled(realNotif);
-
       const overlayVal = await AsyncStorage.getItem('@cmpf_perm_overlay');
       setOverlayEnabled(overlayVal === 'true');
-
       const batteryVal = await AsyncStorage.getItem('@cmpf_perm_battery');
       setBatteryEnabled(batteryVal === 'true');
     } catch (_e) {}
@@ -237,21 +232,6 @@ export default function SettingsScreen({ onBack, onUpdatePreferences }) {
   };
 
   const activeCount = (overlayEnabled ? 1 : 0) + (batteryEnabled ? 1 : 0) + (notifEnabled ? 1 : 0);
-  const allConfigured = activeCount === 3;
-
-  const getIconBg = (enabled) => {
-    if (enabled) {
-      return isDark ? 'rgba(0, 102, 255, 0.2)' : '#eff6ff';
-    }
-    return isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5';
-  };
-
-  const getIconColor = (enabled) => {
-    if (enabled) {
-      return isDark ? '#60a5fa' : '#0066ff';
-    }
-    return isDark ? '#34d399' : '#10b981';
-  };
 
   const changeTheme = async (nextMode) => {
     setMode(nextMode);
@@ -267,235 +247,116 @@ export default function SettingsScreen({ onBack, onUpdatePreferences }) {
     }
   };
 
+  const PermRow = ({ icon, label, statusText, enabled, onToggle }) => (
+    <TouchableOpacity style={[styles.permRow, { borderColor: colors.border }]} activeOpacity={0.7} onPress={onToggle}>
+      <View style={[styles.permIcon, { backgroundColor: isDark ? colors.surfaceAlt : (enabled ? '#eff6ff' : '#f3f4f6') }]}>
+        <Ionicons name={icon} size={18} color={enabled ? '#2563eb' : '#9ca3af'} />
+      </View>
+      <View style={styles.permTextWrap}>
+        <Text style={[styles.permLabel, arBold, { color: colors.textPrimary }]}>{label}</Text>
+        <Text style={[styles.permStatus, arRegular, { color: enabled ? '#2563eb' : '#9ca3af' }]}>{statusText}</Text>
+      </View>
+      <Switch
+        trackColor={{ false: '#d1d5db', true: '#2563eb' }}
+        thumbColor="#ffffff"
+        ios_backgroundColor="#d1d5db"
+        value={enabled}
+        onValueChange={onToggle}
+      />
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
-            onPress={onBack}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.topTitleWrap}>
-            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{t('settings.title')}</Text>
-          </View>
-          <View style={styles.placeholderBtn} />
-        </View>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack} activeOpacity={0.8}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{t('settings.title')}</Text>
+        <View style={styles.headerPlaceholder} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Permissions & System Settings Card */}
+        <Text style={[styles.sectionLabel, arBold, { color: colors.textSecondary }]}>{t('settings.permTitle')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.permHeaderRow}>
-            <View
-              style={[
-                styles.permIconBadge,
-                {
-                  backgroundColor: allConfigured
-                    ? isDark
-                      ? 'rgba(0, 102, 255, 0.15)'
-                      : '#eff6ff'
-                    : isDark
-                      ? 'rgba(16, 185, 129, 0.15)'
-                      : '#ecfdf5',
-                  borderColor: allConfigured
-                    ? isDark
-                      ? 'rgba(0, 102, 255, 0.4)'
-                      : '#bfdbfe'
-                    : isDark
-                      ? 'rgba(16, 185, 129, 0.4)'
-                      : '#a7f3d0',
-                },
-              ]}
-            >
-              <Ionicons
-                name="shield-checkmark"
-                size={24}
-                color={allConfigured ? (isDark ? '#60a5fa' : '#0066ff') : (isDark ? '#34d399' : '#10b981')}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('settings.permTitle')}</Text>
-                <View
-                  style={{
-                    backgroundColor: allConfigured ? 'rgba(0, 102, 255, 0.12)' : 'rgba(16, 185, 129, 0.15)',
-                    paddingHorizontal: 8,
-                    paddingVertical: 2,
-                    borderRadius: 999,
-                    borderWidth: 1,
-                    borderColor: allConfigured ? '#0066ff' : '#10b981',
-                  }}
-                >
-                  <Text
-                    style={[
-                      arBold,
-                      {
-                        fontSize: 11,
-                        color: allConfigured ? (isDark ? '#60a5fa' : '#0066ff') : (isDark ? '#34d399' : '#10b981'),
-                      },
-                    ]}
-                  >
-                    {allConfigured
-                      ? isArabic
-                        ? 'مفعلة بالكامل (3/3)'
-                        : '100% Configuré (3/3)'
-                      : isArabic
-                        ? `في انتظار الإعداد (${activeCount}/3)`
-                        : `À configurer (${activeCount}/3)`}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary, marginBottom: 0 }]}>
-                {t('settings.permSub')}
-              </Text>
-            </View>
-          </View>
-
-          {/* Item 1: Overlay */}
-          <TouchableOpacity
-            style={[styles.permItem, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-            activeOpacity={0.85}
-            onPress={() => togglePerm('overlay')}
-          >
-            <View style={styles.permItemRow}>
-              <View style={[styles.permSmallIcon, { backgroundColor: getIconBg(overlayEnabled) }]}>
-                <Ionicons name="copy-outline" size={17} color={getIconColor(overlayEnabled)} />
-              </View>
-              <View style={{ flex: 1, paddingHorizontal: 8 }}>
-                <Text style={[styles.permItemText, arBold, { color: colors.textPrimary }]}>
-                  {t('settings.permOverlay')}
-                </Text>
-                <Text style={[styles.permStatusSub, arRegular, { color: overlayEnabled ? (isDark ? '#60a5fa' : '#0066ff') : (isDark ? '#34d399' : '#10b981') }]}>
-                  {overlayEnabled
-                    ? (isArabic ? '● مفعل ونشط' : '● Activé et configuré')
-                    : (isArabic ? '○ غير مفعل - اضغط للإعداد في الهاتف' : '○ Non configuré - Appuyer pour régler')}
-                </Text>
-              </View>
-              <Switch
-                trackColor={{ false: '#10b981', true: '#0066ff' }}
-                thumbColor="#ffffff"
-                ios_backgroundColor="#10b981"
-                value={overlayEnabled}
-                onValueChange={() => togglePerm('overlay')}
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Item 2: Battery */}
-          <TouchableOpacity
-            style={[styles.permItem, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-            activeOpacity={0.85}
-            onPress={() => togglePerm('battery')}
-          >
-            <View style={styles.permItemRow}>
-              <View style={[styles.permSmallIcon, { backgroundColor: getIconBg(batteryEnabled) }]}>
-                <Ionicons name="battery-charging-outline" size={17} color={getIconColor(batteryEnabled)} />
-              </View>
-              <View style={{ flex: 1, paddingHorizontal: 8 }}>
-                <Text style={[styles.permItemText, arBold, { color: colors.textPrimary }]}>
-                  {t('settings.permBattery')}
-                </Text>
-                <Text style={[styles.permStatusSub, arRegular, { color: batteryEnabled ? (isDark ? '#60a5fa' : '#0066ff') : (isDark ? '#34d399' : '#10b981') }]}>
-                  {batteryEnabled
-                    ? (isArabic ? '● مفعل ونشط' : '● Activé et configuré')
-                    : (isArabic ? '○ غير مفعل - اضغط للإعداد في الهاتف' : '○ Non configuré - Appuyer pour régler')}
-                </Text>
-              </View>
-              <Switch
-                trackColor={{ false: '#10b981', true: '#0066ff' }}
-                thumbColor="#ffffff"
-                ios_backgroundColor="#10b981"
-                value={batteryEnabled}
-                onValueChange={() => togglePerm('battery')}
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Item 3: Notifications */}
-          <TouchableOpacity
-            style={[styles.permItem, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-            activeOpacity={0.85}
-            onPress={() => togglePerm('notif')}
-          >
-            <View style={styles.permItemRow}>
-              <View style={[styles.permSmallIcon, { backgroundColor: getIconBg(notifEnabled) }]}>
-                <Ionicons name="notifications-outline" size={17} color={getIconColor(notifEnabled)} />
-              </View>
-              <View style={{ flex: 1, paddingHorizontal: 8 }}>
-                <Text style={[styles.permItemText, arBold, { color: colors.textPrimary }]}>
-                  {t('settings.permNotif')}
-                </Text>
-                <Text style={[styles.permStatusSub, arRegular, { color: notifEnabled ? (isDark ? '#60a5fa' : '#0066ff') : (isDark ? '#34d399' : '#10b981') }]}>
-                  {notifEnabled
-                    ? (isArabic ? '● مفعل ونشط' : '● Activé et configuré')
-                    : (isArabic ? '○ غير مفعل - اضغط للإعداد في الهاتف' : '○ Non configuré - Appuyer pour régler')}
-                </Text>
-              </View>
-              <Switch
-                trackColor={{ false: '#10b981', true: '#0066ff' }}
-                thumbColor="#ffffff"
-                ios_backgroundColor="#10b981"
-                value={notifEnabled}
-                onValueChange={() => togglePerm('notif')}
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Main Action Button to open Phone Settings */}
-          <TouchableOpacity
-            style={styles.openSettingsBtn}
-            onPress={handleOpenPhoneSettings}
-            activeOpacity={0.88}
-          >
-            <Ionicons name="settings" size={18} color="#ffffff" />
-            <Text style={[styles.openSettingsBtnText, arBold]}>{t('settings.permBtn')}</Text>
-          </TouchableOpacity>
+          <PermRow
+            icon="copy-outline"
+            label={t('settings.permOverlay')}
+            statusText={overlayEnabled ? (isArabic ? 'مفعل' : 'Activé') : (isArabic ? 'غير مفعل' : 'Non configuré')}
+            enabled={overlayEnabled}
+            onToggle={() => togglePerm('overlay')}
+          />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <PermRow
+            icon="battery-charging-outline"
+            label={t('settings.permBattery')}
+            statusText={batteryEnabled ? (isArabic ? 'مفعل' : 'Activé') : (isArabic ? 'غير مفعل' : 'Non configuré')}
+            enabled={batteryEnabled}
+            onToggle={() => togglePerm('battery')}
+          />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <PermRow
+            icon="notifications-outline"
+            label={t('settings.permNotif')}
+            statusText={notifEnabled ? (isArabic ? 'مفعل' : 'Activé') : (isArabic ? 'غير مفعل' : 'Non configuré')}
+            enabled={notifEnabled}
+            onToggle={() => togglePerm('notif')}
+          />
         </View>
 
-        {/* Appearance Card */}
+        <Text style={[styles.sectionFooter, arRegular, { color: colors.textSecondary }]}>
+          {activeCount}/3 {isArabic ? 'مفعلة' : 'configurés'}
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.openSettingsBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
+          onPress={handleOpenPhoneSettings}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
+          <Text style={[styles.openSettingsText, arBold, { color: colors.textPrimary }]}>{t('settings.permBtn')}</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <Text style={[styles.sectionLabel, arBold, { color: colors.textSecondary }]}>{t('settings.appearanceTitle')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('settings.appearanceTitle')}</Text>
-          <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('settings.appearanceSub')}</Text>
-          <View style={styles.row}>
+          <View style={styles.optionsRow}>
             {THEME_OPTIONS.map((item) => {
               const active = mode === item;
               return (
                 <TouchableOpacity
                   key={item}
-                  style={[styles.optionBtn, { borderColor: colors.border, backgroundColor: colors.surfaceAlt }, active && [styles.optionBtnActive, { borderColor: colors.primary }]]}
+                  style={[styles.optionChip, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceAlt : '#f9fafb' }, active && { borderColor: '#2563eb', backgroundColor: isDark ? 'rgba(37,99,235,0.15)' : '#eff6ff' }]}
                   onPress={() => changeTheme(item)}
                 >
-                  <Text style={[styles.optionText, arRegular, active && { color: colors.primary }]}>{item === 'light' ? t('onboarding.themeLight') : t('onboarding.themeDark')}</Text>
+                  <Ionicons name={item === 'light' ? 'sunny-outline' : 'moon-outline'} size={16} color={active ? '#2563eb' : colors.textSecondary} />
+                  <Text style={[styles.optionChipText, arRegular, { color: active ? '#2563eb' : colors.textSecondary }]}>
+                    {item === 'light' ? t('onboarding.themeLight') : t('onboarding.themeDark')}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
 
-        {/* Language Card */}
+        <Text style={[styles.sectionLabel, arBold, { color: colors.textSecondary }]}>{t('settings.languageTitle')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('settings.languageTitle')}</Text>
-          <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('settings.languageSub')}</Text>
-          <View style={styles.row}>
+          <View style={styles.optionsRow}>
             {LANG_OPTIONS.map((item) => {
               const active = language === item;
               const label = item === 'ar' ? t('onboarding.languageAr') : item === 'en' ? t('onboarding.languageEn') : t('onboarding.languageFr');
               return (
                 <TouchableOpacity
                   key={item}
-                  style={[styles.optionBtn, { borderColor: colors.border, backgroundColor: colors.surfaceAlt }, active && [styles.optionBtnActive, { borderColor: colors.primary }]]}
+                  style={[styles.optionChip, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceAlt : '#f9fafb' }, active && { borderColor: '#2563eb', backgroundColor: isDark ? 'rgba(37,99,235,0.15)' : '#eff6ff' }]}
                   onPress={() => changeLanguage(item)}
                 >
-                  <Text style={[styles.optionText, arRegular, active && { color: colors.primary }]}>{label}</Text>
+                  <Text style={[styles.optionChipText, arRegular, { color: active ? '#2563eb' : colors.textSecondary }]}>{label}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -505,166 +366,120 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginHorizontal: s(16, 14, 20),
-      marginTop: s(12, 10, 16),
-      marginBottom: s(6, 4, 8),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
-    },
-    topTitle: {
-      color: '#0a2540',
-      fontSize: s(17, 15, 20),
-      fontWeight: '900',
       textAlign: 'center',
-      letterSpacing: -0.3,
+      color: '#111827',
+      fontSize: s(17, 15, 20),
+      fontWeight: '700',
     },
-    placeholderBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
+    headerPlaceholder: {
+      width: s(40, 36, 44),
     },
     content: {
-      paddingHorizontal: s(16, 12, 22),
-      paddingVertical: s(14, 12, 20),
-      gap: s(14, 12, 18),
+      paddingHorizontal: s(16, 14, 20),
+      paddingTop: s(8, 6, 10),
+      paddingBottom: s(32, 24, 40),
+    },
+    sectionLabel: {
+      fontSize: s(12, 11, 13),
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginTop: s(20, 16, 24),
+      marginBottom: s(8, 6, 10),
+      marginLeft: s(4, 2, 6),
+    },
+    sectionFooter: {
+      fontSize: s(12, 11, 13),
+      marginTop: s(6, 4, 8),
+      marginLeft: s(4, 2, 6),
     },
     card: {
-      borderRadius: s(20, 16, 24),
+      borderRadius: 16,
       borderWidth: 1,
-      padding: s(16, 14, 20),
+      overflow: 'hidden',
     },
-    cardTitle: {
-      fontSize: s(19, 16, 23),
-      fontWeight: '900',
-    },
-    cardSub: {
-      marginTop: s(6, 4, 8),
-      marginBottom: s(12, 10, 14),
-      fontSize: s(13, 11, 16),
-      lineHeight: s(19, 17, 22),
-    },
-    permHeaderRow: {
+    permRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      paddingHorizontal: s(14, 12, 16),
+      paddingVertical: s(12, 10, 14),
       gap: s(12, 10, 14),
-      marginBottom: s(12, 10, 14),
     },
-    permIconBadge: {
-      width: s(48, 42, 54),
-      height: s(48, 42, 54),
-      borderRadius: s(14, 12, 16),
-      backgroundColor: '#fff1f2',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: '#fecdd3',
-    },
-    permItem: {
-      borderRadius: s(14, 12, 16),
-      borderWidth: 1,
-      paddingHorizontal: s(12, 10, 14),
-      paddingVertical: s(10, 8, 12),
-      marginBottom: s(8, 6, 10),
-    },
-    permItemRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: s(10, 8, 12),
-    },
-    permSmallIcon: {
-      width: s(32, 28, 36),
-      height: s(32, 28, 36),
-      borderRadius: s(8, 7, 10),
+    permIcon: {
+      width: s(36, 32, 40),
+      height: s(36, 32, 40),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    permItemText: {
-      fontSize: s(13, 11, 15),
-      fontWeight: '700',
+    permTextWrap: {
+      flex: 1,
     },
-    permStatusSub: {
-      marginTop: s(2, 2, 4),
-      fontSize: s(11, 10, 13),
+    permLabel: {
+      fontSize: s(14, 12, 16),
       fontWeight: '600',
     },
+    permStatus: {
+      marginTop: 2,
+      fontSize: s(12, 11, 13),
+      fontWeight: '500',
+    },
+    divider: {
+      height: 1,
+      marginLeft: s(62, 54, 70),
+    },
     openSettingsBtn: {
-      backgroundColor: '#0066ff',
-      minHeight: s(46, 40, 52),
-      borderRadius: s(14, 12, 16),
+      marginTop: s(10, 8, 12),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      gap: s(8, 6, 10),
-      marginTop: s(6, 4, 8),
-      shadowColor: '#0066ff',
-      shadowOpacity: 0.25,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 4,
+      backgroundColor: '#f3f4f6',
+      borderRadius: 12,
+      paddingHorizontal: s(14, 12, 16),
+      paddingVertical: s(12, 10, 14),
+      gap: s(10, 8, 12),
     },
-    openSettingsBtnText: {
-      color: '#ffffff',
-      fontSize: s(13, 12, 15),
-      fontWeight: '800',
+    openSettingsText: {
+      flex: 1,
+      fontSize: s(14, 12, 16),
+      fontWeight: '600',
     },
-    row: {
+    optionsRow: {
       flexDirection: 'row',
       gap: s(8, 6, 10),
+      padding: s(14, 12, 16),
       flexWrap: 'wrap',
     },
-    optionBtn: {
-      minWidth: s(96, 84, 120),
-      minHeight: s(42, 36, 50),
-      borderRadius: s(12, 10, 16),
-      borderWidth: 1,
+    optionChip: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(10, 8, 14),
+      gap: s(6, 4, 8),
+      paddingHorizontal: s(14, 12, 18),
+      paddingVertical: s(10, 8, 12),
+      borderRadius: 10,
+      borderWidth: 1,
     },
-    optionBtnActive: {
-      borderWidth: 2,
-      backgroundColor: '#eaf2ff',
-    },
-    optionText: {
-      color: '#2c4e7d',
-      fontWeight: '700',
-      fontSize: s(13, 11, 16),
+    optionChipText: {
+      fontSize: s(14, 12, 16),
+      fontWeight: '600',
     },
   });
 };

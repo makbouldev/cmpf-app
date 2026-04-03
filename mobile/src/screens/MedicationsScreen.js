@@ -41,70 +41,68 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
 
   const txt = isArabic
     ? {
-        pageTitle: 'تنظيم مواعيد وتنبيهات الأدوية',
-        pageSub: 'منبه صوتي وتذكير منتظم لمواعيدك',
+        pageTitle: 'تنظيم مواعيد الأدوية',
+        pageSub: 'منبه صوتي وتذكير منتظم',
         addMedicine: 'حفظ وتفعيل التنبيه',
         medName: 'اسم الدواء',
         medPlaceholder: 'مثال: Paracetamol 500mg',
         times: 'أوقات التناول',
-        addTime: 'إضافة وقت',
+        addTime: 'إضافة',
         notesPlaceholder: 'ملاحظات (مثال: حبة واحدة بعد الأكل)',
-        currentMeds: 'الأدوية المبرمجة حالياً',
-        noMeds: 'لا توجد أدوية مبرمجة حالياً. أضف دواءك لضبط المنبه.',
+        currentMeds: 'الأدوية المبرمجة',
+        noMeds: 'لا توجد أدوية مبرمجة. أضف دواءك لضبط المنبه.',
         edit: 'تعديل',
         delete: 'حذف',
-        testSound: '🔔 تجربة المنبه الصوتي الآن',
-        testItem: 'تجربة',
-        invalidTime: 'أدخل الوقت بصيغة HH:MM مثل 08:30.',
+        invalidTime: 'أدخل الوقت بصيغة HH:MM.',
         duplicateTime: 'هذا الوقت مضاف بالفعل.',
-        nameRequired: 'يرجى إدخال اسم الدواء أولاً.',
-        timeRequired: 'أضف وقتاً واحداً على الأقل للتذكير.',
-        timeInvalid: 'يوجد وقت غير صالح. الصيغة يجب أن تكون HH:MM.',
-        duplicateInForm: 'يوجد وقت مكرر في نفس النموذج.',
-        timeExists: 'هذا الوقت موجود مسبقاً لهذا الدواء.',
-        saveFail: 'تعذر حفظ التذكير حالياً.',
-        saved: 'تم حفظ الدواء وتفعيل التنبيه بنجاح.',
-        chooseTime: 'اختيار توقيت التنبيه',
+        nameRequired: 'يرجى إدخال اسم الدواء.',
+        timeRequired: 'أضف وقتاً واحداً على الأقل.',
+        timeInvalid: 'يوجد وقت غير صالح.',
+        duplicateInForm: 'يوجد وقت مكرر.',
+        timeExists: 'هذا الوقت موجود مسبقاً.',
+        saveFail: 'تعذر حفظ التذكير.',
+        saved: 'تم حفظ الدواء بنجاح.',
+        chooseTime: 'اختيار التوقيت',
         hour: 'الساعة',
         minute: 'الدقائق',
-        confirm: 'تأكيد الوقت',
+        confirm: 'تأكيد',
         cancel: 'إلغاء',
         settings: 'الإعدادات',
         about: 'من نحن',
         contact: 'اتصل بنا',
+        permissions: 'إعدادات التنبيهات',
       }
     : {
-        pageTitle: 'Rappels & Alarmes Médicaments',
-        pageSub: 'Suivi rigoureux et alerte sonore quotidienne',
-        addMedicine: "Enregistrer & Activer l'alarme",
+        pageTitle: 'Rappels Médicaments',
+        pageSub: 'Alarme sonore quotidienne',
+        addMedicine: "Enregistrer l'alarme",
         medName: 'Nom du médicament',
         medPlaceholder: 'Ex: Doliprane 1000mg',
         times: 'Heures de prise',
-        addTime: 'Ajouter heure',
+        addTime: 'Ajouter',
         notesPlaceholder: 'Instructions (ex: 1 comprimé après repas)',
         currentMeds: 'Médicaments programmés',
-        noMeds: 'Aucun rappel programmé pour le moment. Ajoutez un médicament ci-dessus.',
+        noMeds: 'Aucun rappel programmé. Ajoutez un médicament ci-dessus.',
         edit: 'Modifier',
         delete: 'Supprimer',
-        testSound: "🔔 Tester la sonnerie d'alarme",
-        testItem: 'Tester',
-        invalidTime: "Entrez l'heure au format HH:MM, ex: 08:30.",
+        invalidTime: "Entrez l'heure au format HH:MM.",
         duplicateTime: 'Cette heure est déjà ajoutée.',
         nameRequired: 'Veuillez saisir le nom du médicament.',
-        timeRequired: 'Ajoutez au moins un horaire de prise.',
-        timeInvalid: 'Un horaire est invalide. Le format doit être HH:MM.',
-        duplicateInForm: 'Le formulaire contient un horaire en double.',
-        timeExists: 'Cet horaire existe déjà pour ce médicament.',
-        saveFail: "Impossible d'enregistrer le rappel pour le moment.",
-        saved: "Rappel enregistré et alarme activée avec succès.",
-        chooseTime: "Choisir l'heure du rappel",
+        timeRequired: 'Ajoutez au moins un horaire.',
+        timeInvalid: 'Un horaire est invalide.',
+        duplicateInForm: 'Horaire en double.',
+        timeExists: 'Cet horaire existe déjà.',
+        saveFail: "Impossible d'enregistrer le rappel.",
+        saved: 'Rappel enregistré avec succès.',
+        chooseTime: "Choisir l'heure",
         hour: 'Heure',
         minute: 'Minutes',
-        confirm: "Confirmer l'horaire",
+        confirm: 'Confirmer',
         cancel: 'Annuler',
         settings: 'Paramètres',
         about: 'À propos',
         contact: 'Contact',
+        permissions: 'Autorisations alarmes',
       };
 
   const [form, setForm] = useState(emptyForm);
@@ -118,17 +116,9 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
 
   const handleMenuAction = (action) => {
     setMenuOpen(false);
-    if (action === 'settings') {
-      onNavigate?.('settings');
-      return;
-    }
-    if (action === 'about') {
-      onNavigate?.('about');
-      return;
-    }
-    if (action === 'contact') {
-      onNavigate?.('home');
-    }
+    if (action === 'settings') { onNavigate?.('settings'); return; }
+    if (action === 'about') { onNavigate?.('about'); return; }
+    if (action === 'contact') { onNavigate?.('home'); }
   };
 
   const loadReminders = async () => {
@@ -243,26 +233,19 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
     });
   };
 
-  const testAlarmNow = (medName = 'Doliprane 1000mg', medNotes = '') => {
-    AlarmManager.startAlarm(medName, medNotes || 'Test de sonnerie immédiat');
-  };
-
   const renderReminder = (item) => {
-    const timeLabel = item.times.map((entry) => entry.time).join(' | ');
+    const timeLabel = item.times.map((entry) => entry.time).join('  ·  ');
     return (
       <View
         key={item.id}
-        style={[
-          styles.medicationItemCard,
-          isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-        ]}
+        style={[styles.medicationItemCard, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
       >
         <View style={styles.medicationItemTop}>
           <View style={styles.medicationItemMain}>
             <Text style={[styles.medicationItemName, arBold, { color: colors.textPrimary }]}>{item.name}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              <Ionicons name="time" size={14} color="#0066ff" />
-              <Text style={[styles.medicationItemTimes, arBold, { color: '#0066ff' }]}>{timeLabel}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 }}>
+              <Ionicons name="time-outline" size={13} color="#2563eb" />
+              <Text style={[styles.medicationItemTimes, arBold]}>{timeLabel}</Text>
             </View>
             {item.notes ? (
               <Text style={[styles.medicationItemMeta, arRegular, { color: colors.textSecondary }]}>{item.notes}</Text>
@@ -270,12 +253,12 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
           </View>
 
           <View style={styles.medicationActions}>
-            <TouchableOpacity style={styles.editBtn} onPress={() => startEdit(item)} activeOpacity={0.9}>
-              <Ionicons name="create-outline" size={14} color="#4b8bff" />
+            <TouchableOpacity style={[styles.editBtn, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => startEdit(item)} activeOpacity={0.8}>
+              <Ionicons name="create-outline" size={13} color="#2563eb" />
               <Text style={styles.editBtnText}>{txt.edit}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDeleteMedication(item)} activeOpacity={0.9}>
+            <TouchableOpacity style={[styles.deleteBtn, isDark && { backgroundColor: 'rgba(220, 38, 38, 0.1)', borderColor: 'rgba(220, 38, 38, 0.2)' }]} onPress={() => handleDeleteMedication(item)} activeOpacity={0.8}>
               <Text style={styles.deleteBtnText}>{txt.delete}</Text>
             </TouchableOpacity>
           </View>
@@ -285,75 +268,65 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
   };
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Top Header Card */}
-        <View style={[styles.topHeaderCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.topBar}>
-            <TouchableOpacity
-              style={[styles.topIconBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-              onPress={onBack}
-              activeOpacity={0.9}
-            >
-              <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-            </TouchableOpacity>
+    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fafc' }]}>
+      {/* Header */}
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack}>
+            <Ionicons name="arrow-back" size={20} color={isDark ? colors.textPrimary : '#374151'} />
+          </TouchableOpacity>
 
-            <View style={styles.topTitleWrap}>
-              <Text style={[styles.pageTitle, arBold, { color: colors.textPrimary }]}>{txt.pageTitle}</Text>
-              <Text style={[styles.pageSub, arRegular, { color: colors.textSecondary }]}>{txt.pageSub}</Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.topIconBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
-              onPress={() => setMenuOpen(true)}
-              activeOpacity={0.9}
-            >
-              <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
-            </TouchableOpacity>
+          <View style={styles.headerTitleWrap}>
+            <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{txt.pageTitle}</Text>
+            <Text style={[styles.headerSub, arRegular, { color: colors.textSecondary }]}>{txt.pageSub}</Text>
           </View>
-        </View>
 
+          <TouchableOpacity
+            style={[styles.headerActionBtn, isDark && { backgroundColor: colors.surfaceAlt }]}
+            onPress={() => setMenuOpen(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="ellipsis-vertical" size={18} color={isDark ? colors.textPrimary : '#374151'} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Form Card */}
         <View style={[styles.formCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {/* Quick Permission Settings Bar */}
+          {/* Permission Bar */}
           <TouchableOpacity
-            style={[
-              styles.testAlarmBtn,
-              {
-                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.15)' : '#f0fdf4',
-                borderColor: isDark ? '#065f46' : '#bbf7d0',
-                marginBottom: 2,
-              },
-            ]}
+            style={[styles.permissionBar, isDark && { backgroundColor: 'rgba(5, 150, 105, 0.1)', borderColor: 'rgba(5, 150, 105, 0.2)' }]}
             onPress={() => Linking.openSettings().catch(() => {})}
-            activeOpacity={0.88}
+            activeOpacity={0.8}
           >
-            <Ionicons name="shield-checkmark" size={18} color="#10b981" />
-            <Text style={[styles.testAlarmText, arBold, { color: isDark ? '#34d399' : '#10b981' }]}>
-              {isArabic ? 'إعدادات أذونات التنبيه في الخلفية ⚙️' : 'Autorisations des alarmes en arrière-plan ⚙️'}
+            <Ionicons name="shield-checkmark-outline" size={16} color={isDark ? '#34d399' : '#059669'} />
+            <Text style={[styles.permissionBarText, arRegular, { color: isDark ? '#34d399' : '#059669' }]}>
+              {txt.permissions}
             </Text>
           </TouchableOpacity>
 
-          <View style={[styles.formSection, { marginTop: 14 }, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+          {/* Medicine Name */}
+          <View style={styles.formSection}>
             <View style={styles.labelRow}>
-              <Ionicons name="medical" size={18} color="#e11d48" />
+              <Ionicons name="medical-outline" size={16} color="#dc2626" />
               <Text style={[styles.sectionLabel, arBold, { color: colors.textPrimary }]}>{txt.medName}</Text>
             </View>
-
             <FormInput
               styles={styles}
               placeholder={txt.medPlaceholder}
               value={form.name}
               onChangeText={(value) => update('name', value)}
-              shellStyle={isDark ? { backgroundColor: colors.surface, borderColor: colors.border } : null}
+              shellStyle={isDark ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border } : null}
               inputStyle={isDark ? { color: colors.textPrimary } : null}
-              placeholderTextColor={isDark ? '#8fa4c7' : '#8ea0ba'}
+              placeholderTextColor="#9ca3af"
             />
           </View>
 
-          <View style={[styles.formSection, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+          {/* Times */}
+          <View style={styles.formSection}>
             <View style={styles.labelRow}>
-              <Ionicons name="time" size={18} color="#0066ff" />
+              <Ionicons name="time-outline" size={16} color="#2563eb" />
               <Text style={[styles.sectionLabel, arBold, { color: colors.textPrimary }]}>{txt.times}</Text>
             </View>
 
@@ -362,12 +335,12 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
                 {form.times.map((time) => (
                   <TouchableOpacity
                     key={time}
-                    style={[styles.timeChip, isDark && { backgroundColor: 'rgba(0, 102, 255, 0.18)' }]}
+                    style={[styles.timeChip, isDark && { backgroundColor: 'rgba(37, 99, 235, 0.15)' }]}
                     onPress={() => removeDraftTime(time)}
-                    activeOpacity={0.9}
+                    activeOpacity={0.8}
                   >
                     <Text style={[styles.timeChipText, isDark && { color: '#60a5fa' }]}>{time}</Text>
-                    <Ionicons name="close-circle" size={16} color="#e11d48" />
+                    <Ionicons name="close-circle" size={14} color="#dc2626" />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -376,55 +349,45 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
             <View style={styles.addTimeRow}>
               <View style={styles.addTimeInputWrap}>
                 <TouchableOpacity
-                  style={[
-                    styles.timePickerField,
-                    isDark && { backgroundColor: colors.surface, borderColor: colors.border },
-                  ]}
+                  style={[styles.timePickerField, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
                   onPress={openTimePicker}
-                  activeOpacity={0.9}
+                  activeOpacity={0.8}
                 >
-                  <Text
-                    style={[
-                      styles.timePickerFieldText,
-                      { color: colors.textPrimary, fontWeight: '800' },
-                    ]}
-                  >
+                  <Text style={[styles.timePickerFieldText, { color: colors.textPrimary }]}>
                     {form.timeInput || '08:30'}
                   </Text>
-                  <Ionicons name="time-outline" size={18} color="#0066ff" />
+                  <Ionicons name="time-outline" size={16} color="#2563eb" />
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity
-                style={[
-                  styles.addTimePill,
-                  isDark && { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: '#065f46' },
-                ]}
+                style={[styles.addTimePill, isDark && { backgroundColor: 'rgba(5, 150, 105, 0.1)', borderColor: 'rgba(5, 150, 105, 0.2)' }]}
                 onPress={() => appendTime(form.timeInput)}
-                activeOpacity={0.9}
+                activeOpacity={0.8}
               >
-                <Ionicons name="add" size={18} color="#10b981" />
+                <Ionicons name="add" size={16} color={isDark ? '#34d399' : '#059669'} />
                 <Text style={[styles.addTimePillText, isDark && { color: '#34d399' }]}>{txt.addTime}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={[styles.formSection, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+          {/* Notes */}
+          <View style={styles.formSection}>
             <FormInput
               styles={styles}
               placeholder={txt.notesPlaceholder}
               value={form.notes}
               onChangeText={(value) => update('notes', value)}
               multiline
-              shellStyle={isDark ? { backgroundColor: colors.surface, borderColor: colors.border } : null}
+              shellStyle={isDark ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border } : null}
               inputStyle={isDark ? { color: colors.textPrimary } : null}
-              placeholderTextColor={isDark ? '#8fa4c7' : '#8ea0ba'}
+              placeholderTextColor="#9ca3af"
             />
           </View>
 
-          {/* Submit Button */}
-          <TouchableOpacity style={styles.addMedicineBtn} activeOpacity={0.9} onPress={submit} disabled={loading}>
-            <Ionicons name="checkmark-circle" size={22} color="#ffffff" />
+          {/* Submit */}
+          <TouchableOpacity style={styles.addMedicineBtn} activeOpacity={0.8} onPress={submit} disabled={loading}>
+            <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
             <Text style={[styles.addMedicineBtnText, arBold]}>{txt.addMedicine}</Text>
           </TouchableOpacity>
         </View>
@@ -433,8 +396,8 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
         <View style={[styles.listCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.listHeader}>
             <Text style={[styles.listTitle, arBold, { color: colors.textPrimary }]}>{txt.currentMeds}</Text>
-            <View style={{ backgroundColor: '#eff6ff', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 }}>
-              <Text style={{ color: '#0066ff', fontSize: 12, fontWeight: '800' }}>{reminders.length}</Text>
+            <View style={[styles.countBadge, isDark && { backgroundColor: colors.surfaceAlt }]}>
+              <Text style={[styles.countBadgeText, { color: colors.textSecondary }]}>{reminders.length}</Text>
             </View>
           </View>
 
@@ -449,9 +412,7 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
       {/* Time Picker Modal */}
       <Modal transparent visible={timePickerOpen} animationType="fade" onRequestClose={() => setTimePickerOpen(false)}>
         <Pressable style={styles.timeModalOverlay} onPress={() => setTimePickerOpen(false)}>
-          <Pressable
-            style={[styles.timeModalCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
+          <Pressable style={[styles.timeModalCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.timeModalTitle, arBold, { color: colors.textPrimary }]}>{txt.chooseTime}</Text>
 
             <View style={styles.timePickerColumns}>
@@ -463,11 +424,17 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
                     return (
                       <TouchableOpacity
                         key={hour}
-                        style={[styles.timeOptionChip, active && styles.timeOptionChipActive]}
+                        style={[
+                          styles.timeOptionChip,
+                          active && styles.timeOptionChipActive,
+                          isDark && !active && { backgroundColor: colors.surfaceAlt },
+                        ]}
                         onPress={() => setSelectedHour(hour)}
-                        activeOpacity={0.9}
+                        activeOpacity={0.8}
                       >
-                        <Text style={[styles.timeOptionText, active && styles.timeOptionTextActive]}>{hour}</Text>
+                        <Text style={[styles.timeOptionText, active && styles.timeOptionTextActive, isDark && !active && { color: colors.textPrimary }]}>
+                          {hour}
+                        </Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -482,11 +449,17 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
                     return (
                       <TouchableOpacity
                         key={minute}
-                        style={[styles.timeOptionChip, active && styles.timeOptionChipActive]}
+                        style={[
+                          styles.timeOptionChip,
+                          active && styles.timeOptionChipActive,
+                          isDark && !active && { backgroundColor: colors.surfaceAlt },
+                        ]}
                         onPress={() => setSelectedMinute(minute)}
-                        activeOpacity={0.9}
+                        activeOpacity={0.8}
                       >
-                        <Text style={[styles.timeOptionText, active && styles.timeOptionTextActive]}>{minute}</Text>
+                        <Text style={[styles.timeOptionText, active && styles.timeOptionTextActive, isDark && !active && { color: colors.textPrimary }]}>
+                          {minute}
+                        </Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -495,11 +468,11 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
             </View>
 
             <View style={styles.timeModalActions}>
-              <TouchableOpacity style={styles.timeModalCancelBtn} onPress={() => setTimePickerOpen(false)} activeOpacity={0.9}>
-                <Text style={styles.timeModalCancelText}>{txt.cancel}</Text>
+              <TouchableOpacity style={[styles.timeModalCancelBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={() => setTimePickerOpen(false)} activeOpacity={0.8}>
+                <Text style={[styles.timeModalCancelText, { color: colors.textSecondary }]}>{txt.cancel}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.timeModalConfirmBtn} onPress={confirmTimeSelection} activeOpacity={0.9}>
+              <TouchableOpacity style={styles.timeModalConfirmBtn} onPress={confirmTimeSelection} activeOpacity={0.8}>
                 <Text style={styles.timeModalConfirmText}>{txt.confirm}</Text>
               </TouchableOpacity>
             </View>
@@ -511,19 +484,19 @@ export default function MedicationsScreen({ onBack, onNavigate }) {
       <Modal transparent visible={menuOpen} animationType="fade" onRequestClose={() => setMenuOpen(false)}>
         <Pressable style={styles.menuOverlay} onPress={() => setMenuOpen(false)}>
           <View style={[styles.menuCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('settings')} activeOpacity={0.9}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('settings')} activeOpacity={0.8}>
               <Text style={[styles.menuText, arRegular, { color: colors.textPrimary }]}>{txt.settings}</Text>
-              <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
+              <Ionicons name="settings-outline" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('about')} activeOpacity={0.9}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('about')} activeOpacity={0.8}>
               <Text style={[styles.menuText, arRegular, { color: colors.textPrimary }]}>{txt.about}</Text>
-              <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
+              <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('contact')} activeOpacity={0.9}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuAction('contact')} activeOpacity={0.8}>
               <Text style={[styles.menuText, arRegular, { color: colors.textPrimary }]}>{txt.contact}</Text>
-              <Ionicons name="call-outline" size={18} color={colors.textSecondary} />
+              <Ionicons name="call-outline" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
         </Pressable>

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '../i18n/I18nContext';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -26,24 +25,24 @@ export default function AboutScreen({ onBack }) {
 
   const txt = isArabic
     ? {
-        title: '\u0645\u0646 \u0646\u062d\u0646',
+        title: 'من نحن',
         heroTitle: 'CMPF',
-        heroSub: '\u0631\u064a\u0627\u062f\u0629 \u0641\u064a \u062e\u062f\u0645\u0627\u062a \u0627\u0644\u0625\u0633\u0639\u0627\u0641 \u0648\u0627\u0644\u0645\u0648\u0627\u0643\u0628\u0629 \u0627\u0644\u0637\u0628\u064a\u0629.',
-        storyTitle: '\u0642\u0635\u0629 CMPF',
+        heroSub: 'ريادة في خدمات الإسعاف والمواكبة الطبية.',
+        storyTitle: 'قصة CMPF',
         storyText:
-          'CMPF \u0634\u0631\u0643\u0629 \u0631\u0627\u0626\u062f\u0629 \u0641\u064a \u062e\u062f\u0645\u0627\u062a \u0627\u0644\u0625\u0633\u0639\u0627\u0641 \u0648\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0637\u0628\u064a\u0629 \u0628\u062e\u0628\u0631\u0629 \u062a\u062a\u062c\u0627\u0648\u0632 75 \u0633\u0646\u0629. \u0646\u0639\u0645\u0644 \u0639\u0644\u0649 \u062a\u0642\u062f\u064a\u0645 \u0627\u0633\u062a\u062c\u0627\u0628\u0629 \u0633\u0631\u064a\u0639\u0629\u060c \u0645\u0631\u0627\u0641\u0642\u0629 \u0622\u0645\u0646\u0629\u060c \u0648\u062d\u0644\u0648\u0644 \u0637\u0628\u064a\u0629 \u0639\u0635\u0631\u064a\u0629 \u062a\u0648\u0627\u0643\u0628 \u0627\u062d\u062a\u064a\u0627\u062c\u0627\u062a \u0627\u0644\u0623\u0641\u0631\u0627\u062f \u0648\u0627\u0644\u0639\u0627\u0626\u0644\u0627\u062a \u0648\u0627\u0644\u0645\u0624\u0633\u0633\u0627\u062a.',
-        missionTitle: '\u0631\u0624\u064a\u062a\u0646\u0627 \u0648\u0645\u0647\u0645\u062a\u0646\u0627',
+          'CMPF شركة رائدة في خدمات الإسعاف والرعاية الطبية بخبرة تتجاوز 75 سنة. نعمل على تقديم استجابة سريعة، مرافقة آمنة، وحلول طبية عصرية تواكب احتياجات الأفراد والعائلات والمؤسسات.',
+        missionTitle: 'رؤيتنا ومهمتنا',
         missionText:
-          '\u0646\u0624\u0645\u0646 \u0623\u0646 \u0627\u0644\u062e\u062f\u0645\u0629 \u0627\u0644\u0635\u062d\u064a\u0629 \u0627\u0644\u0645\u062d\u062a\u0631\u0641\u0629 \u062a\u062c\u0645\u0639 \u0628\u064a\u0646 \u0627\u0644\u0633\u0631\u0639\u0629\u060c \u0627\u0644\u0625\u0646\u0633\u0627\u0646\u064a\u0629\u060c \u0648\u0627\u0644\u062b\u0642\u0629. \u0644\u0647\u0630\u0627 \u0646\u0628\u0646\u064a \u062a\u062c\u0631\u0628\u0629 \u062a\u0633\u0647\u0644 \u0637\u0644\u0628 \u0627\u0644\u0625\u0633\u0639\u0627\u0641\u060c \u0627\u0644\u0637\u0628\u064a\u0628 \u0627\u0644\u0645\u0646\u0632\u0644\u064a\u060c \u062a\u062a\u0628\u0639 \u0627\u0644\u062f\u0648\u0627\u0621\u060c \u0648\u0627\u0644\u0648\u0635\u0648\u0644 \u0625\u0644\u0649 \u0627\u0644\u062e\u062f\u0645\u0627\u062a \u0627\u0644\u0642\u0631\u064a\u0628\u0629 \u0628\u0633\u0647\u0648\u0644\u0629.',
+          'نؤمن أن الخدمة الصحية المحترفة تجمع بين السرعة، الإنسانية، والثقة. لهذا نبني تجربة تسهل طلب الإسعاف، الطبيب المنزلي، تتبع الدواء، والوصول إلى الخدمات القريبة بسهولة.',
         points: [
-          '\u0641\u0631\u0642 \u0645\u062f\u0631\u0628\u0629 \u0648\u0627\u0633\u062a\u062c\u0627\u0628\u0629 \u0633\u0631\u064a\u0639\u0629',
-          '\u062a\u0646\u0638\u064a\u0645 \u0645\u062d\u062a\u0631\u0641 \u0644\u0644\u0646\u0642\u0644 \u0648\u0627\u0644\u0631\u0639\u0627\u064a\u0629',
-          '\u062a\u062c\u0631\u0628\u0629 \u0631\u0642\u0645\u064a\u0629 \u0633\u0647\u0644\u0629 \u0648\u0648\u0627\u0636\u062d\u0629',
+          'فرق مدربة واستجابة سريعة',
+          'تنظيم محترف للنقل والرعاية',
+          'تجربة رقمية سهلة وواضحة',
         ],
         statLabels: {
-          experience: '\u0633\u0646\u0629 \u062e\u0628\u0631\u0629',
-          availability: '\u062c\u0627\u0647\u0632\u064a\u0629 \u0645\u0633\u062a\u0645\u0631\u0629',
-          support: '\u062f\u0639\u0645 \u0627\u0633\u062a\u0639\u062c\u0627\u0644\u064a',
+          experience: 'سنة خبرة',
+          availability: 'جاهزية مستمرة',
+          support: 'دعم استعجالي',
         },
       }
     : language === 'en'
@@ -92,64 +91,48 @@ export default function AboutScreen({ onBack }) {
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
-            onPress={onBack}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.topTitleWrap}>
-            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
-          </View>
-          <View style={styles.placeholderBtn} />
-        </View>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack} activeOpacity={0.8}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
+        <View style={styles.headerPlaceholder} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={isDark ? ['#16223d', '#1d4ed8', '#0f766e'] : ['#f8fbff', '#eef5ff', '#fff4ec']}
-          style={[styles.heroCard, { borderColor: colors.border }]}
-        >
-          <View style={styles.heroLogoWrap}>
-            <Image source={logo} style={styles.heroLogo} resizeMode="contain" />
-          </View>
+        <View style={styles.logoSection}>
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <Text style={[styles.brandName, arBold, { color: colors.textPrimary }]}>{txt.heroTitle}</Text>
+          <Text style={[styles.brandSub, arRegular, { color: colors.textSecondary }]}>{txt.heroSub}</Text>
+        </View>
 
-          <Text style={[styles.heroName, arBold, { color: colors.textPrimary }]}>{txt.heroTitle}</Text>
-          <Text style={[styles.heroSub, arRegular, { color: colors.textSecondary }]}>{txt.heroSub}</Text>
+        <View style={styles.statsRow}>
+          {STATS.map((item) => (
+            <View key={item.key} style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Ionicons name={item.icon} size={18} color="#2563eb" />
+              <Text style={[styles.statValue, arBold, { color: colors.textPrimary }]}>{item.value}</Text>
+              <Text style={[styles.statLabel, arRegular, { color: colors.textSecondary }]}>{txt.statLabels[item.key]}</Text>
+            </View>
+          ))}
+        </View>
 
-          <View style={styles.statsRow}>
-            {STATS.map((item) => (
-              <View key={item.key} style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <Ionicons name={item.icon} size={18} color={colors.primary} />
-                <Text style={[styles.statValue, arBold, { color: colors.textPrimary }]}>{item.value}</Text>
-                <Text style={[styles.statLabel, arRegular, { color: colors.textSecondary }]}>{txt.statLabels[item.key]}</Text>
-              </View>
-            ))}
-          </View>
-        </LinearGradient>
-
-        <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.storyTitle}</Text>
           <Text style={[styles.sectionText, arRegular, { color: colors.textSecondary }]}>{txt.storyText}</Text>
         </View>
 
-        <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.missionTitle}</Text>
           <Text style={[styles.sectionText, arRegular, { color: colors.textSecondary }]}>{txt.missionText}</Text>
 
-          <View style={styles.pointsWrap}>
-            {txt.points.map((point) => (
-              <View key={point} style={[styles.pointRow, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-                <View style={[styles.pointIcon, { backgroundColor: 'rgba(13,110,253,0.12)' }]}>
-                  <Ionicons name="checkmark" size={16} color={colors.primary} />
-                </View>
-                <Text style={[styles.pointText, arRegular, { color: colors.textPrimary }]}>{point}</Text>
+          {txt.points.map((point) => (
+            <View key={point} style={styles.pointRow}>
+              <View style={styles.pointDot}>
+                <Ionicons name="checkmark" size={14} color="#2563eb" />
               </View>
-            ))}
-          </View>
+              <Text style={[styles.pointText, arRegular, { color: colors.textPrimary }]}>{point}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -161,161 +144,114 @@ const createStyles = (width) => {
 
   return StyleSheet.create({
     screen: { flex: 1 },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginHorizontal: s(16, 14, 20),
-      marginTop: s(12, 10, 16),
-      marginBottom: s(6, 4, 8),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
-    },
-    topTitle: {
-      color: '#0a2540',
-      fontSize: s(17, 15, 20),
-      fontWeight: '900',
       textAlign: 'center',
-      letterSpacing: -0.3,
+      color: '#111827',
+      fontSize: s(17, 15, 20),
+      fontWeight: '700',
     },
-    placeholderBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
+    headerPlaceholder: {
+      width: s(40, 36, 44),
     },
     content: {
-      paddingHorizontal: s(16, 12, 22),
-      paddingVertical: s(14, 12, 22),
-      gap: s(14, 12, 18),
+      paddingHorizontal: s(16, 14, 20),
+      paddingTop: s(24, 20, 30),
+      paddingBottom: s(32, 24, 40),
+      gap: s(16, 14, 20),
     },
-    heroCard: {
-      borderRadius: s(28, 22, 34),
-      borderWidth: 1,
-      padding: s(16, 14, 22),
-      overflow: 'hidden',
-    },
-    heroLogoWrap: {
+    logoSection: {
       alignItems: 'center',
-      marginTop: s(8, 6, 12),
+      paddingVertical: s(8, 6, 12),
     },
-    heroLogo: {
-      width: s(110, 90, 132),
-      height: s(110, 90, 132),
+    logo: {
+      width: s(88, 72, 104),
+      height: s(88, 72, 104),
     },
-    topTitle: {
-      marginTop: s(10, 8, 12),
-      fontSize: s(16, 14, 20),
-      textAlign: 'center',
+    brandName: {
+      marginTop: s(12, 10, 16),
+      fontSize: s(28, 24, 34),
       fontWeight: '800',
-    },
-    heroName: {
-      marginTop: s(4, 4, 8),
-      fontSize: s(34, 28, 42),
-      textAlign: 'center',
-      fontWeight: '900',
       letterSpacing: 1,
     },
-    heroSub: {
-      marginTop: s(8, 6, 10),
-      fontSize: s(14, 12, 17),
+    brandSub: {
+      marginTop: s(6, 4, 8),
+      fontSize: s(14, 12, 16),
       textAlign: 'center',
       lineHeight: s(22, 18, 26),
+      paddingHorizontal: s(12, 8, 16),
     },
     statsRow: {
-      marginTop: s(18, 14, 22),
       flexDirection: 'row',
       gap: s(10, 8, 12),
     },
     statCard: {
       flex: 1,
-      borderRadius: s(18, 16, 22),
+      borderRadius: 16,
       borderWidth: 1,
-      paddingVertical: s(12, 10, 16),
+      paddingVertical: s(14, 12, 18),
       paddingHorizontal: s(10, 8, 12),
       alignItems: 'center',
-      gap: s(6, 4, 8),
+      gap: s(4, 3, 6),
     },
     statValue: {
-      fontSize: s(22, 18, 28),
-      fontWeight: '900',
+      fontSize: s(20, 17, 24),
+      fontWeight: '800',
     },
     statLabel: {
       textAlign: 'center',
-      fontSize: s(12, 10, 14),
-      lineHeight: s(18, 16, 20),
-      fontWeight: '700',
+      fontSize: s(11, 10, 13),
+      lineHeight: s(16, 14, 18),
     },
-    sectionCard: {
-      borderRadius: s(24, 20, 30),
+    section: {
+      borderRadius: 16,
       borderWidth: 1,
-      padding: s(16, 14, 22),
+      padding: s(18, 14, 22),
     },
     sectionTitle: {
-      fontSize: s(24, 20, 30),
-      fontWeight: '900',
+      fontSize: s(20, 17, 24),
+      fontWeight: '700',
+      marginBottom: s(8, 6, 10),
     },
     sectionText: {
-      marginTop: s(10, 8, 12),
-      fontSize: s(14, 12, 17),
-      lineHeight: s(24, 20, 28),
-    },
-    pointsWrap: {
-      marginTop: s(14, 12, 18),
-      gap: s(10, 8, 12),
+      fontSize: s(14, 12, 16),
+      lineHeight: s(22, 19, 26),
     },
     pointRow: {
-      borderRadius: s(18, 14, 22),
-      borderWidth: 1,
-      paddingHorizontal: s(12, 10, 16),
-      paddingVertical: s(12, 10, 14),
       flexDirection: 'row',
       alignItems: 'center',
       gap: s(10, 8, 12),
+      marginTop: s(10, 8, 12),
     },
-    pointIcon: {
-      width: s(32, 28, 36),
-      height: s(32, 28, 36),
+    pointDot: {
+      width: s(28, 24, 32),
+      height: s(28, 24, 32),
       borderRadius: 999,
+      backgroundColor: '#eff6ff',
       alignItems: 'center',
       justifyContent: 'center',
     },
     pointText: {
       flex: 1,
-      fontSize: s(14, 12, 17),
-      lineHeight: s(22, 18, 26),
-      fontWeight: '700',
+      fontSize: s(14, 12, 16),
+      lineHeight: s(20, 17, 24),
     },
   });
 };

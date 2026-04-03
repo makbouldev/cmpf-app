@@ -21,15 +21,15 @@ import { useI18n } from '../i18n/I18nContext';
 import { useAppTheme } from '../theme/ThemeContext';
 
 const CITIES = [
-  { id: 'agadir', fr: 'Agadir', en: 'Agadir', ar: '\u0623\u0643\u0627\u062f\u064a\u0631', lat: 30.4278, lng: -9.5981 },
-  { id: 'casablanca', fr: 'Casablanca', en: 'Casablanca', ar: '\u0627\u0644\u062f\u0627\u0631 \u0627\u0644\u0628\u064a\u0636\u0627\u0621', lat: 33.5731, lng: -7.5898 },
-  { id: 'fes', fr: 'Fes', en: 'Fez', ar: '\u0641\u0627\u0633', lat: 34.0181, lng: -5.0078 },
-  { id: 'laayoune', fr: 'Laayoune', en: 'Laayoune', ar: '\u0627\u0644\u0639\u064a\u0648\u0646', lat: 27.1536, lng: -13.2033 },
-  { id: 'marrakech', fr: 'Marrakech', en: 'Marrakech', ar: '\u0645\u0631\u0627\u0643\u0634', lat: 31.6295, lng: -7.9811 },
-  { id: 'meknes', fr: 'Meknes', en: 'Meknes', ar: '\u0645\u0643\u0646\u0627\u0633', lat: 33.8935, lng: -5.5473 },
-  { id: 'nador', fr: 'Nador', en: 'Nador', ar: '\u0627\u0644\u0646\u0627\u0638\u0648\u0631', lat: 35.1681, lng: -2.9287 },
-  { id: 'tanger', fr: 'Tanger', en: 'Tangier', ar: '\u0637\u0646\u062c\u0629', lat: 35.7595, lng: -5.834 },
-  { id: 'tetouan', fr: 'Tetouan', en: 'Tetouan', ar: '\u062a\u0637\u0648\u0627\u0646', lat: 35.5889, lng: -5.3626 },
+  { id: 'agadir', fr: 'Agadir', en: 'Agadir', ar: 'أكادير', lat: 30.4278, lng: -9.5981 },
+  { id: 'casablanca', fr: 'Casablanca', en: 'Casablanca', ar: 'الدار البيضاء', lat: 33.5731, lng: -7.5898 },
+  { id: 'fes', fr: 'Fes', en: 'Fez', ar: 'فاس', lat: 34.0181, lng: -5.0078 },
+  { id: 'laayoune', fr: 'Laayoune', en: 'Laayoune', ar: 'العيون', lat: 27.1536, lng: -13.2033 },
+  { id: 'marrakech', fr: 'Marrakech', en: 'Marrakech', ar: 'مراكش', lat: 31.6295, lng: -7.9811 },
+  { id: 'meknes', fr: 'Meknes', en: 'Meknes', ar: 'مكناس', lat: 33.8935, lng: -5.5473 },
+  { id: 'nador', fr: 'Nador', en: 'Nador', ar: 'الناظور', lat: 35.1681, lng: -2.9287 },
+  { id: 'tanger', fr: 'Tanger', en: 'Tangier', ar: 'طنجة', lat: 35.7595, lng: -5.834 },
+  { id: 'tetouan', fr: 'Tetouan', en: 'Tetouan', ar: 'تطوان', lat: 35.5889, lng: -5.3626 },
 ];
 
 const isFiniteCoord = (lat, lng) => Number.isFinite(lat) && Number.isFinite(lng);
@@ -68,30 +68,30 @@ const nearestCityFromCoords = ({ lat, lng }) => {
 
 const CITY_PHARMACIES = {
   agadir: [
-    { name: 'Pharmacie Al Farah صيدلية الفرح', address: 'Rue 105, Al Farah, Agadir', lat: 30.3973, lng: -9.5615, phone: '0528234567', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie Le Complexe صيدلية المركب', address: 'Rue Bir Anzerane, Al Wifaq, Agadir', lat: 30.3929, lng: -9.5611, phone: '0528287654', opening_hours: '08:30 - 22:30' },
-    { name: 'Pharmacie Tarik El Kheir صيدلية طريق الخير', address: 'Avenue Mohamed Fassi, Agadir', lat: 30.3914, lng: -9.5549, phone: '0528213456', opening_hours: '24/7' },
-    { name: 'Pharmacie Hassan صيدلية حسن', address: 'Rue Taghazout, Bensergao, Agadir', lat: 30.3888, lng: -9.5707, phone: '0528221199', opening_hours: '08:30 - 22:00', delivery: 'yes' },
-    { name: 'Pharmacie Ahl El Kheir صيدلية أهل الخير', address: 'Haut Founty, Agadir', lat: 30.4000, lng: -9.5674, phone: '0528298765', opening_hours: '24/7' },
-    { name: 'Pharmacie Al Qods صيدلية القدس', address: 'Isli, Al Qods, Agadir', lat: 30.4169, lng: -9.5552, phone: '0528231010', opening_hours: '08:30 - 22:00' },
-    { name: 'Pharmacie Aloulya صيدلية العليا', address: 'Beni Snassen, Haut Anza, Agadir', lat: 30.4567, lng: -9.6344, phone: '0528239090', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie Talborjt صيدلية تالبورجت', address: 'Quartier Talborjt, Agadir', lat: 30.4225, lng: -9.5950, phone: '0528841234', opening_hours: '08:30 - 22:00' },
+    { name: 'Pharmacie Al Farah', address: 'Rue 105, Al Farah, Agadir', lat: 30.3973, lng: -9.5615, phone: '0528234567', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie Le Complexe', address: 'Rue Bir Anzerane, Al Wifaq, Agadir', lat: 30.3929, lng: -9.5611, phone: '0528287654', opening_hours: '08:30 - 22:30' },
+    { name: 'Pharmacie Tarik El Kheir', address: 'Avenue Mohamed Fassi, Agadir', lat: 30.3914, lng: -9.5549, phone: '0528213456', opening_hours: '24/7' },
+    { name: 'Pharmacie Hassan', address: 'Rue Taghazout, Bensergao, Agadir', lat: 30.3888, lng: -9.5707, phone: '0528221199', opening_hours: '08:30 - 22:00', delivery: 'yes' },
+    { name: 'Pharmacie Ahl El Kheir', address: 'Haut Founty, Agadir', lat: 30.4000, lng: -9.5674, phone: '0528298765', opening_hours: '24/7' },
+    { name: 'Pharmacie Al Qods', address: 'Isli, Al Qods, Agadir', lat: 30.4169, lng: -9.5552, phone: '0528231010', opening_hours: '08:30 - 22:00' },
+    { name: 'Pharmacie Aloulya', address: 'Beni Snassen, Haut Anza, Agadir', lat: 30.4567, lng: -9.6344, phone: '0528239090', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie Talborjt', address: 'Quartier Talborjt, Agadir', lat: 30.4225, lng: -9.5950, phone: '0528841234', opening_hours: '08:30 - 22:00' },
   ],
   casablanca: [
-    { name: 'Pharmacie de la Poste صيدلية البريد', address: 'Boulevard de Paris, Casablanca', lat: 33.5931, lng: -7.6180, phone: '0522201020', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie de la Liberté صيدلية الحرية', address: 'Avenue Lalla Yacout, Casablanca', lat: 33.5910, lng: -7.6150, phone: '0522304050', opening_hours: '08:30 - 22:00' },
-    { name: 'Pharmacie Des Archers صيدلية الرماة', address: 'Boulevard Zerktouni, Casablanca', lat: 33.5850, lng: -7.6250, phone: '0522271819', opening_hours: '24/7' },
-    { name: 'Pharmacie Anfa صيدلية أنفا', address: "Boulevard d'Anfa, Casablanca", lat: 33.5890, lng: -7.6350, phone: '0522361214', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie Maarif صيدلية المعاريف', address: 'Rue Bab Mansour, Maarif, Casablanca', lat: 33.5780, lng: -7.6380, phone: '0522258090', opening_hours: '08:30 - 22:00' },
+    { name: 'Pharmacie de la Poste', address: 'Boulevard de Paris, Casablanca', lat: 33.5931, lng: -7.6180, phone: '0522201020', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie de la Liberté', address: 'Avenue Lalla Yacout, Casablanca', lat: 33.5910, lng: -7.6150, phone: '0522304050', opening_hours: '08:30 - 22:00' },
+    { name: 'Pharmacie Des Archers', address: 'Boulevard Zerktouni, Casablanca', lat: 33.5850, lng: -7.6250, phone: '0522271819', opening_hours: '24/7' },
+    { name: 'Pharmacie Anfa', address: "Boulevard d'Anfa, Casablanca", lat: 33.5890, lng: -7.6350, phone: '0522361214', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie Maarif', address: 'Rue Bab Mansour, Maarif, Casablanca', lat: 33.5780, lng: -7.6380, phone: '0522258090', opening_hours: '08:30 - 22:00' },
   ],
   marrakech: [
-    { name: 'Pharmacie Guéliz صيدلية جليز', address: 'Avenue Mohammed V, Guéliz, Marrakech', lat: 31.6340, lng: -8.0120, phone: '0524431234', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie Koutoubia صيدلية الكتبية', address: 'Place Jemaa el-Fna, Marrakech', lat: 31.6250, lng: -7.9890, phone: '0524441010', opening_hours: '08:30 - 22:30' },
-    { name: 'Pharmacie Majorelle صيدلية ماجوريل', address: 'Rue Yves Saint Laurent, Marrakech', lat: 31.6420, lng: -8.0030, phone: '0524301515', opening_hours: '24/7' },
+    { name: 'Pharmacie Guéliz', address: 'Avenue Mohammed V, Guéliz, Marrakech', lat: 31.6340, lng: -8.0120, phone: '0524431234', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie Koutoubia', address: 'Place Jemaa el-Fna, Marrakech', lat: 31.6250, lng: -7.9890, phone: '0524441010', opening_hours: '08:30 - 22:30' },
+    { name: 'Pharmacie Majorelle', address: 'Rue Yves Saint Laurent, Marrakech', lat: 31.6420, lng: -8.0030, phone: '0524301515', opening_hours: '24/7' },
   ],
   rabat: [
-    { name: 'Pharmacie Agdal صيدلية أكدال', address: 'Avenue Fal Ould Oumeir, Agdal, Rabat', lat: 34.0050, lng: -6.8490, phone: '0537771234', opening_hours: '24/7', delivery: 'yes' },
-    { name: 'Pharmacie Hassan صيدلية حسان', address: 'Avenue Moulay Hassan, Rabat', lat: 34.0180, lng: -6.8320, phone: '0537721020', opening_hours: '08:30 - 22:00' },
+    { name: 'Pharmacie Agdal', address: 'Avenue Fal Ould Oumeir, Agdal, Rabat', lat: 34.0050, lng: -6.8490, phone: '0537771234', opening_hours: '24/7', delivery: 'yes' },
+    { name: 'Pharmacie Hassan', address: 'Avenue Moulay Hassan, Rabat', lat: 34.0180, lng: -6.8320, phone: '0537721020', opening_hours: '08:30 - 22:00' },
   ],
 };
 
@@ -157,11 +157,7 @@ const buildMeta = (item, index) => {
   const rating = Number((4.6 + ((index + 1) % 4) * 0.1).toFixed(1));
   const time = minutesFromDistance(item.distanceKm);
 
-  return {
-    openNow,
-    rating,
-    time,
-  };
+  return { openNow, rating, time };
 };
 
 export default function PharmaciesScreen({ onBack, onNavigate }) {
@@ -177,34 +173,22 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
   const cityLabel = (city) => city?.[language] || city?.fr || city?.en || city?.id || '';
 
   const txt = {
-    yourLocation: language === 'ar' ? '\u0645\u0648\u0642\u0639\u0643' : language === 'fr' ? 'Votre position' : 'Your location',
-    findTitle: language === 'ar' ? '\u0627\u0628\u062d\u062b \u0639\u0646 \u0635\u064a\u062f\u0644\u064a\u0629' : language === 'fr' ? 'Trouver une pharmacie' : 'Find a pharmacy',
+    title: language === 'ar' ? 'صيدليات قريبة' : language === 'fr' ? 'Pharmacies' : 'Pharmacies',
     searchPlaceholder:
       language === 'ar'
-        ? '\u0627\u0628\u062d\u062b \u0639\u0646 \u0635\u064a\u062f\u0644\u064a\u0629 \u0623\u0648 \u0645\u0646\u0637\u0642\u0629 \u0623\u0648 \u062e\u062f\u0645\u0629'
+        ? 'ابحث عن صيدلية...'
         : language === 'fr'
-          ? 'Rechercher pharmacie, zone, service'
-          : 'Search pharmacy, area, service',
-    closest: language === 'ar' ? '\u0623\u0642\u0631\u0628 \u0635\u064a\u062f\u0644\u064a\u0629' : language === 'fr' ? 'Pharmacie la plus proche' : 'Closest pharmacy',
-    nearYou: language === 'ar' ? '\u0642\u0631\u064a\u0628\u0629 \u0645\u0646\u0643' : language === 'fr' ? 'Pres de vous' : 'Near you',
-    viewMap: language === 'ar' ? '\u0639\u0631\u0636 \u0627\u0644\u062e\u0631\u064a\u0637\u0629' : language === 'fr' ? 'Voir carte' : 'View map',
-    call: language === 'ar' ? '\u0627\u062a\u0635\u0644' : language === 'fr' ? 'Appeler' : 'Call',
-    directions: language === 'ar' ? '\u0627\u0644\u0627\u062a\u062c\u0627\u0647\u0627\u062a' : language === 'fr' ? 'Itineraire' : 'Directions',
-    route: language === 'ar' ? '\u0645\u0633\u0627\u0631' : language === 'fr' ? 'Route' : 'Route',
-    away: language === 'ar' ? '\u0628\u0639\u064a\u062f' : language === 'fr' ? 'de distance' : 'away',
-    noPhone: language === 'ar' ? '\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062a\u0641 \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631' : language === 'fr' ? 'Numero indisponible' : 'Phone number unavailable',
-    delivery: language === 'ar' ? '\u062a\u0648\u0635\u064a\u0644' : language === 'fr' ? 'Livraison' : 'Delivery',
-    prescription: language === 'ar' ? '\u0648\u0635\u0641\u0629 \u0637\u0628\u064a\u0629' : language === 'fr' ? 'Ordonnance' : 'Prescription',
-    cosmetics: language === 'ar' ? '\u0645\u0633\u062a\u062d\u0636\u0631\u0627\u062a \u062a\u062c\u0645\u064a\u0644' : language === 'fr' ? 'Cosmétiques' : 'Cosmetics',
-    babyCare: language === 'ar' ? '\u0639\u0646\u0627\u064a\u0629 \u0628\u0627\u0644\u0637\u0641\u0644' : language === 'fr' ? 'Soins Bébé' : 'Baby Care',
-    topTitle: language === 'ar' ? '\u0635\u064a\u062f\u0644\u064a\u0627\u062a \u0642\u0631\u064a\u0628\u0629' : language === 'fr' ? 'Pharmacies a proximite' : 'Nearby Pharmacies',
-    topSub: language === 'ar' ? '\u0645\u0633\u0627\u0631 \u0628\u0633\u064a\u0637 \u0648\u0633\u0631\u064a\u0639' : language === 'fr' ? 'Un parcours simple et rapide' : 'A simple and fast process',
-    refreshLocation:
-      language === 'ar'
-        ? '\u062a\u062d\u062f\u064a\u062b \u0627\u0644\u0645\u0648\u0642\u0639'
-        : language === 'fr'
-          ? 'Actualiser position'
-          : 'Refresh location',
+          ? 'Rechercher une pharmacie...'
+          : 'Search a pharmacy...',
+    closest: language === 'ar' ? 'الأقرب' : language === 'fr' ? 'La plus proche' : 'Closest',
+    nearYou: language === 'ar' ? 'قريبة منك' : language === 'fr' ? 'Près de vous' : 'Near you',
+    viewMap: language === 'ar' ? 'الخريطة' : language === 'fr' ? 'Carte' : 'Map',
+    directions: language === 'ar' ? 'المسار' : language === 'fr' ? 'Itinéraire' : 'Directions',
+    route: language === 'ar' ? 'مسار' : language === 'fr' ? 'Route' : 'Route',
+    away: language === 'ar' ? '' : language === 'fr' ? '' : 'away',
+    noPhone: language === 'ar' ? 'رقم غير متوفر' : language === 'fr' ? 'Numéro indisponible' : 'Phone unavailable',
+    location: language === 'ar' ? 'موقعك' : language === 'fr' ? 'Votre position' : 'Your location',
+    refresh: language === 'ar' ? 'تحديث' : language === 'fr' ? 'Actualiser' : 'Refresh',
   };
 
   const [loading, setLoading] = useState(false);
@@ -277,12 +261,7 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
       if (Platform.OS === 'web') {
         window.open(url, '_blank');
       } else {
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-          await Linking.openURL(url);
-        } else {
-          await Linking.openURL(url); // fallback
-        }
+        await Linking.openURL(url);
       }
     } catch (e) {
       console.error(e);
@@ -292,41 +271,38 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
   const handleCall = async (item) => {
     let phone = String(item.phone || '').trim();
 
-    // 1. If phone is missing, try fetching it securely from Google Places API
     if (!phone) {
       const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (apiKey) {
         const query = encodeURIComponent(`${item.name} ${item.address || ''} Maroc`.trim());
         const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=formatted_phone_number&input=${query}&inputtype=textquery&key=${apiKey}`;
-        
+
         try {
           const res = await fetch(url);
           const data = await res.json();
-          if (data.candidates && data.candidates.length > 0 && data.candidates[0].formatted_phone_number) {
+          if (data.candidates?.[0]?.formatted_phone_number) {
             phone = data.candidates[0].formatted_phone_number;
           }
         } catch (e) {
-          console.error("Google Places Error:", e);
+          console.error('Google Places Error:', e);
         }
       }
     }
 
-    // 1.b Fallback: Custom automated backend scraper!
     if (!phone) {
       try {
         const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
         const query = encodeURIComponent(`${item.name} ${item.address || ''} Casablanca`.trim());
         const res = await fetch(`${apiUrl}/api/pharmacies/phone?q=${query}`);
         const data = await res.json();
-        if (data && data.phone) {
-           phone = data.phone;
+        if (data?.phone) {
+          phone = data.phone;
         }
       } catch (e) {
-        console.error("Automated Scraper Error:", e);
+        console.error('Automated Scraper Error:', e);
       }
     }
 
-    // 2. If it's still missing, show the alert indicating no number was found
     if (!phone) {
       if (Platform.OS === 'web') {
         window.alert(txt.noPhone);
@@ -336,19 +312,13 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
       return;
     }
 
-    // 3. Directly call the number with tel: protocol
     const cleanPhone = phone.replace(/[^\d+]/g, '');
     const url = `tel:${cleanPhone}`;
     try {
       if (Platform.OS === 'web') {
         window.location.href = url;
       } else {
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-          await Linking.openURL(url);
-        } else {
-          await Linking.openURL(url); // fallback
-        }
+        await Linking.openURL(url);
       }
     } catch (e) {
       console.error(e);
@@ -363,15 +333,11 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
     try {
       let items = [];
 
-      // 1. Try Backend API first (Nominatim bounded search)
       try {
         const response = await fetchNearbyPharmacies({ lat, lng, radius: 7000 });
         items = response?.data?.pharmacies || [];
-      } catch (_apiError) {
-        // Backend fallback
-      }
+      } catch (_apiError) {}
 
-      // 2. If backend empty or failed, try direct nominatim fetch
       if (!items || items.length === 0) {
         try {
           items = await fetchNearbyPharmaciesDirect({ lat, lng, radius: 7000 });
@@ -380,7 +346,6 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
         }
       }
 
-      // 3. Fallback to curated city pharmacies if still empty
       const targetCity = cityForFallback || nearestCityFromCoords({ lat, lng });
       if (!items || items.length === 0) {
         const fallbackList = CITY_PHARMACIES[targetCity.id] || CITY_PHARMACIES.agadir;
@@ -390,7 +355,6 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
         }));
       }
 
-      // City-accurate Moroccan phone prefixes
       const getMoroccanPhonePrefix = (cLat, cLng, cName) => {
         const nameLower = String(cName || '').toLowerCase();
         if (nameLower.includes('agadir') || (cLat < 31.0 && cLng < -8.0)) return '0528';
@@ -399,7 +363,7 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
         if (nameLower.includes('tanger') || nameLower.includes('tétouan')) return '0539';
         if (nameLower.includes('fès') || nameLower.includes('fes') || nameLower.includes('meknès')) return '0535';
         if (nameLower.includes('oujda')) return '0536';
-        return '0528'; // default Souss-Massa
+        return '0528';
       };
       const prefix = getMoroccanPhonePrefix(lat, lng, targetCity.fr);
 
@@ -440,7 +404,6 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
   };
 
   const getCoordinates = async () => {
-    // 1. Try web browser navigator.geolocation
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.geolocation) {
       try {
         const webPos = await new Promise((resolve, reject) => {
@@ -454,11 +417,10 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
           return webPos;
         }
       } catch (webErr) {
-        console.log('Web geolocation failed, attempting fallback:', webErr?.message);
+        console.log('Web geolocation failed:', webErr?.message);
       }
     }
 
-    // 2. Try Expo Location on mobile
     if (Platform.OS !== 'web') {
       try {
         let permission = await Location.getForegroundPermissionsAsync();
@@ -483,13 +445,12 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
       }
     }
 
-    // 3. Fallback to HTTPS IP geolocation
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 3000);
       const ipRes = await fetch('https://ipapi.co/json/', { signal: controller.signal });
       clearTimeout(timer);
-      if (ipRes && ipRes.ok) {
+      if (ipRes?.ok) {
         const data = await ipRes.json();
         if (Number.isFinite(data.latitude) && Number.isFinite(data.longitude)) {
           return { lat: data.latitude, lng: data.longitude };
@@ -497,7 +458,6 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
       }
     } catch (_ipErr) {}
 
-    // 4. Default to Agadir
     return { lat: 30.4278, lng: -9.5981 };
   };
 
@@ -535,133 +495,145 @@ export default function PharmaciesScreen({ onBack, onNavigate }) {
   const closestPharmacy = filteredPharmacies[0] || pharmacies[0] || null;
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fbf8' }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.topBar}>
-            <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={onBack}>
-              <Ionicons name="arrow-back" size={s(20, 18, 24)} color={isDark ? colors.textPrimary : '#203554'} />
-            </TouchableOpacity>
+    <SafeAreaView style={[styles.screen, { backgroundColor: isDark ? colors.background : '#f8fafc' }]}>
+      {/* Header */}
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack}>
+            <Ionicons name="arrow-back" size={20} color={isDark ? colors.textPrimary : '#374151'} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{txt.title}</Text>
+        </View>
+      </View>
 
-            <View style={styles.topTitleWrap}>
-              <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{txt.topTitle}</Text>
-              <Text style={[styles.topSub, arRegular, { color: colors.textSecondary }]}>{txt.topSub}</Text>
-            </View>
-
-            <TouchableOpacity style={[styles.topActionBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={() => onNavigate?.('settings')}>
-              <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
-            </TouchableOpacity>
+      {/* Location Bar */}
+      <View style={[styles.locationBar, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={styles.locationLeft}>
+          <View style={styles.locationDot} />
+          <View>
+            <Text style={[styles.locationLabel, arRegular, { color: colors.textSecondary }]}>{txt.location}</Text>
+            <Text style={[styles.locationCity, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
+              {detectedAreaLabel}
+            </Text>
           </View>
         </View>
+        <TouchableOpacity
+          style={[styles.refreshBtn, isDark && { backgroundColor: colors.surfaceAlt }]}
+          onPress={loadFromCurrentLocation}
+          activeOpacity={0.8}
+        >
+          {loading ? (
+            <ActivityIndicator color={isDark ? '#9ca3af' : '#374151'} size="small" />
+          ) : (
+            <>
+              <Ionicons name="locate" size={14} color={isDark ? '#9ca3af' : '#374151'} />
+              <Text style={[styles.refreshBtnText, arRegular, { color: isDark ? '#9ca3af' : '#374151' }]}>{txt.refresh}</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.heroSection}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.heroTitleWrap}>
-              <Text style={[styles.heroEyebrow, arRegular]}>{txt.yourLocation}</Text>
-              <Text style={[styles.heroTitle, arBold]}>{txt.findTitle}</Text>
-            </View>
-
-            <TouchableOpacity style={styles.heroIconBtn} onPress={loadFromCurrentLocation} activeOpacity={0.9}>
-              {loading ? (
-                <ActivityIndicator color="#ffffff" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="locate" size={s(16, 14, 18)} color="#ffffff" />
-                  <Text style={[styles.heroIconBtnText, arBold]}>{txt.refreshLocation}</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          <Text style={[styles.heroLocationText, arRegular]} numberOfLines={1}>
-            {detectedAreaLabel}
-          </Text>
-
-          <View style={styles.searchBar}>
-            <Text style={{ fontSize: s(16, 14, 18) }}>🔎</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Search */}
+        <View style={styles.searchWrap}>
+          <View style={[styles.searchBar, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color="#9ca3af" />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={txt.searchPlaceholder}
-              placeholderTextColor="#8ea2ba"
-              style={[styles.searchInput, arRegular]}
+              placeholderTextColor="#9ca3af"
+              style={[styles.searchInput, arRegular, { color: colors.textPrimary }]}
             />
           </View>
         </View>
 
+        {/* Closest pharmacy */}
         {closestPharmacy ? (
-          <View style={[styles.closestCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={styles.closestInfo}>
-              <Text style={[styles.closestEyebrow, arRegular, isDark && { color: '#34d399' }]}>{txt.closest}</Text>
-              <Text style={[styles.closestTitle, arBold, isDark && { color: colors.textPrimary }]} numberOfLines={1}>
-                {closestPharmacy.name}
-              </Text>
-              <Text style={[styles.closestMeta, arRegular, isDark && { color: colors.textSecondary }]}>
-                {closestPharmacy.distanceKm != null ? `${closestPharmacy.distanceKm.toFixed(1)} km` : '--'} {txt.away}
-              </Text>
+          <View style={styles.closestWrap}>
+            <View style={[styles.closestCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={styles.closestInfo}>
+                <Text style={[styles.closestLabel, arRegular, isDark && { color: '#34d399' }]}>{txt.closest}</Text>
+                <Text style={[styles.closestTitle, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
+                  {closestPharmacy.name}
+                </Text>
+                <Text style={[styles.closestMeta, arRegular, { color: colors.textSecondary }]}>
+                  {closestPharmacy.distanceKm != null ? `${closestPharmacy.distanceKm.toFixed(1)} km` : '--'}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.closestRouteBtn} onPress={() => openDirections(closestPharmacy)} activeOpacity={0.8}>
+                <Text style={[styles.closestRouteText, arBold]}>{txt.route}</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity style={styles.closestRouteBtn} onPress={() => openDirections(closestPharmacy)} activeOpacity={0.9}>
-              <Text style={[styles.closestRouteText, arBold]}>{txt.route}</Text>
-            </TouchableOpacity>
           </View>
         ) : null}
 
+        {/* Section header */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, arBold, isDark && { color: colors.textPrimary }]}>{txt.nearYou}</Text>
+          <Text style={[styles.sectionTitle, arBold, { color: colors.textPrimary }]}>{txt.nearYou}</Text>
           {closestPharmacy ? (
-            <TouchableOpacity onPress={() => openDirections(closestPharmacy)} activeOpacity={0.9}>
+            <TouchableOpacity onPress={() => openDirections(closestPharmacy)} activeOpacity={0.8}>
               <Text style={[styles.sectionLink, arRegular]}>{txt.viewMap}</Text>
             </TouchableOpacity>
           ) : null}
         </View>
 
+        {/* Loading */}
         {loading && pharmacies.length === 0 ? (
           <View style={styles.loadingState}>
-            <ActivityIndicator color="#0ca36c" />
+            <ActivityIndicator color="#059669" />
           </View>
         ) : null}
 
+        {/* Empty */}
         {!loading && filteredPharmacies.length === 0 ? (
           <View style={[styles.emptyCard, isDark && { backgroundColor: colors.surface }]}>
-            <Text style={[styles.emptyTitle, arBold, isDark && { color: colors.textPrimary }]}>{t('pharmacies.noResults')}</Text>
-            <Text style={[styles.emptySub, arRegular, isDark && { color: colors.textSecondary }]}>{t('pharmacies.noResultsSub')}</Text>
+            <Text style={[styles.emptyTitle, arBold, { color: colors.textPrimary }]}>{t('pharmacies.noResults')}</Text>
+            <Text style={[styles.emptySub, arRegular, { color: colors.textSecondary }]}>{t('pharmacies.noResultsSub')}</Text>
           </View>
         ) : null}
 
+        {/* Pharmacy cards */}
         {filteredPharmacies.map((item) => (
           <View key={item.id} style={[styles.pharmacyCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.cardTopRow}>
-            <View style={styles.iconWrap}>
-              <View style={styles.capsuleShell}>
-                <View style={styles.capsuleHalfWarm} />
-                <View style={styles.capsuleHalfPink} />
-                <View style={styles.capsuleDot} />
+              <View style={[styles.iconWrap, isDark && { backgroundColor: 'rgba(5, 150, 105, 0.15)' }]}>
+                <Ionicons name="medical" size={18} color="#059669" />
               </View>
-            </View>
 
               <View style={styles.cardMainInfo}>
-                <Text style={[styles.cardTitle, arBold, isDark && { color: colors.textPrimary }]} numberOfLines={1}>
+                <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]} numberOfLines={1}>
                   {item.name}
                 </Text>
-                <Text style={[styles.cardAddress, arRegular, isDark && { color: colors.textSecondary }]} numberOfLines={1}>
+                <Text style={[styles.cardAddress, arRegular, { color: colors.textSecondary }]} numberOfLines={1}>
                   {item.address || t('pharmacies.addrUnavailable')}
                 </Text>
               </View>
 
               <View style={styles.ratingWrap}>
                 <View style={styles.ratingRow}>
-                  <Ionicons name="star" size={s(13, 12, 15)} color="#f4b827" />
-                  <Text style={[styles.ratingText, arBold]}>{item.meta?.rating?.toFixed(1)}</Text>
+                  <Ionicons name="star" size={12} color="#f59e0b" />
+                  <Text style={[styles.ratingText, { color: colors.textPrimary }]}>{item.meta?.rating?.toFixed(1)}</Text>
                 </View>
-                <Text style={[styles.distanceText, arRegular]}>{item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : '--'}</Text>
-                <Text style={[styles.distanceText, arRegular]}>{item.meta?.time ? `${item.meta.time} min` : '--'}</Text>
+                <Text style={[styles.distanceText, { color: colors.textSecondary }]}>
+                  {item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : '--'}
+                </Text>
               </View>
             </View>
 
             <View style={styles.cardActions}>
-              <TouchableOpacity style={styles.directionsBtn} onPress={() => openDirections(item)} activeOpacity={0.9}>
+              <TouchableOpacity style={[styles.directionsBtn]} onPress={() => openDirections(item)} activeOpacity={0.8}>
                 <Text style={[styles.directionsBtnText, arBold]}>{txt.directions}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.callBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
+                onPress={() => handleCall(item)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.callBtnText, arRegular, { color: colors.textPrimary }]}>
+                  {item.phone || txt.noPhone}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

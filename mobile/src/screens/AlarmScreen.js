@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { stopNativeAlarm, scheduleNativeAlarm } from '../services/medicationAlarms';
-
-const { width, height } = Dimensions.get('window');
 
 export default function AlarmScreen({ medicationName, onDismiss }) {
   const handleTakeMedication = () => {
@@ -20,7 +17,6 @@ export default function AlarmScreen({ medicationName, onDismiss }) {
 
   const handleSnooze = () => {
     stopNativeAlarm();
-    // Schedule snooze in 5 minutes
     const snoozeTime = Date.now() + 5 * 60 * 1000;
     scheduleNativeAlarm('snooze-' + Date.now(), medicationName, snoozeTime);
     onDismiss?.();
@@ -29,29 +25,23 @@ export default function AlarmScreen({ medicationName, onDismiss }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="notifications" size={100} color="#ff3b30" />
+        <View style={styles.iconRing}>
+          <Ionicons name="notifications" size={48} color="#ffffff" />
         </View>
 
-        <Text style={styles.title}>ALERTE MÉDICAMENT</Text>
+        <Text style={styles.label}>ALERTE MÉDICAMENT</Text>
         <Text style={styles.medName}>{medicationName || "Nom du médicament"}</Text>
-        <Text style={styles.subtitle}>C'est l'heure de votre prise !</Text>
+        <Text style={styles.subtitle}>C'est l'heure de votre prise</Text>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.takeButton]} 
-            onPress={handleTakeMedication}
-          >
-            <Ionicons name="checkmark-circle" size={30} color="#fff" />
-            <Text style={styles.buttonText}>JE L'AI PRIS</Text>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.takeBtn} onPress={handleTakeMedication} activeOpacity={0.8}>
+            <Ionicons name="checkmark" size={24} color="#fff" />
+            <Text style={styles.takeBtnText}>JE L'AI PRIS</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.snoozeButton]} 
-            onPress={handleSnooze}
-          >
-            <Ionicons name="alarm" size={30} color="#8e8e93" />
-            <Text style={styles.buttonTextSnooze}>SNOOZE (5 MIN)</Text>
+          <TouchableOpacity style={styles.snoozeBtn} onPress={handleSnooze} activeOpacity={0.8}>
+            <Ionicons name="alarm-outline" size={22} color="#9ca3af" />
+            <Text style={styles.snoozeBtnText}>SNOOZE (5 MIN)</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -62,68 +52,75 @@ export default function AlarmScreen({ medicationName, onDismiss }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#111827',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 24,
   },
-  iconContainer: {
-    marginBottom: 30,
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
-    borderRadius: 100,
-    padding: 30,
+  iconRing: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#dc2626',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
   },
-  title: {
-    fontSize: 28,
-    color: '#ff3b30',
-    fontWeight: '900',
+  label: {
+    fontSize: 14,
+    color: '#dc2626',
+    fontWeight: '700',
     letterSpacing: 2,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   medName: {
-    fontSize: 40,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 32,
+    color: '#f9fafb',
+    fontWeight: '800',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#8e8e93',
+    fontSize: 16,
+    color: '#6b7280',
     textAlign: 'center',
-    marginBottom: 60,
+    marginBottom: 56,
   },
-  buttonContainer: {
+  actions: {
     width: '100%',
-    gap: 20,
+    gap: 12,
   },
-  button: {
+  takeBtn: {
     flexDirection: 'row',
-    height: 80,
-    borderRadius: 40,
+    height: 56,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 15,
+    gap: 10,
+    backgroundColor: '#059669',
   },
-  takeButton: {
-    backgroundColor: '#34c759',
-  },
-  snoozeButton: {
-    backgroundColor: '#1c1c1e',
-    borderWidth: 1,
-    borderColor: '#3a3a3c',
-  },
-  buttonText: {
+  takeBtnText: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 17,
+    fontWeight: '700',
   },
-  buttonTextSnooze: {
-    color: '#8e8e93',
-    fontSize: 22,
-    fontWeight: 'bold',
+  snoozeBtn: {
+    flexDirection: 'row',
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#1f2937',
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  snoozeBtnText: {
+    color: '#9ca3af',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });

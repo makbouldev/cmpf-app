@@ -4,74 +4,57 @@ import { createScaler } from '../utils/responsive';
 export const createGalleryStyles = (width) => {
   const s = createScaler(width);
   const numColumns = width > 600 ? 3 : 2;
-  const padding = s(14, 12, 18);
-  const gap = s(12, 10, 14);
+  const padding = s(16, 14, 20);
+  const gap = s(10, 8, 12);
   const itemWidth = (width - padding * 2 - gap * (numColumns - 1)) / numColumns;
 
   return StyleSheet.create({
     screen: {
       flex: 1,
-      backgroundColor: '#f6f8fc',
+      backgroundColor: '#f8fafc',
     },
     content: {
       paddingHorizontal: padding,
       paddingTop: s(10, 8, 14),
       paddingBottom: s(28, 22, 36),
     },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginBottom: s(12, 10, 16),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    titleWrap: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
       paddingHorizontal: s(8, 6, 12),
     },
-    topTitle: {
-      color: '#0a2540',
+    title: {
+      color: '#111827',
       fontSize: s(17, 15, 20),
-      fontWeight: '900',
+      fontWeight: '700',
       textAlign: 'center',
-      letterSpacing: -0.3,
     },
-    topSub: {
-      marginTop: s(2, 1, 4),
-      color: '#64748b',
-      fontSize: s(12, 11, 14),
-      fontWeight: '500',
+    subtitle: {
+      marginTop: 2,
+      color: '#6b7280',
+      fontSize: s(12, 11, 13),
+      fontWeight: '400',
       textAlign: 'center',
+    },
+    placeholder: {
+      width: s(40, 36, 44),
     },
     grid: {
       flexDirection: 'row',
@@ -80,17 +63,12 @@ export const createGalleryStyles = (width) => {
     },
     imageItem: {
       width: itemWidth,
-      height: itemWidth * 1.2,
-      borderRadius: s(16, 14, 20),
+      height: itemWidth * 1.15,
+      borderRadius: 12,
       backgroundColor: '#ffffff',
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: '#f0f4f8',
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+      borderColor: '#e5e7eb',
     },
     image: {
       width: '100%',
@@ -98,7 +76,7 @@ export const createGalleryStyles = (width) => {
     },
     modalContainer: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      backgroundColor: 'rgba(0, 0, 0, 0.92)',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -111,7 +89,12 @@ export const createGalleryStyles = (width) => {
       top: s(50, 40, 60),
       right: s(20, 15, 25),
       zIndex: 10,
-      padding: s(10),
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 };

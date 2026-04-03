@@ -10,7 +10,8 @@ export default function AdminLoginScreen({ onBack, onNavigate, onUpdatePreferenc
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(width), [width]);
   const { t, language } = useI18n();
-  const { colors } = useAppTheme();
+  const { colors, mode } = useAppTheme();
+  const isDark = mode === 'dark';
   const arRegular = language === 'ar' ? { fontFamily: 'Cairo_400Regular' } : null;
   const arBold = language === 'ar' ? { fontFamily: 'Cairo_700Bold' } : null;
 
@@ -47,39 +48,35 @@ export default function AdminLoginScreen({ onBack, onNavigate, onUpdatePreferenc
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={onBack}>
-            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.topTitleWrap}>
-            <Text style={[styles.title, arBold, { color: colors.textPrimary }]}>{t('admin.title')}</Text>
-          </View>
-          <View style={styles.placeholderBtn} />
-        </View>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{t('admin.title')}</Text>
+        <View style={styles.headerPlaceholder} />
       </View>
 
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('admin.loginTitle')}</Text>
-        <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('admin.loginSub')}</Text>
+      <View style={styles.formWrap}>
+        <Text style={[styles.title, arBold, { color: colors.textPrimary }]}>{t('admin.loginTitle')}</Text>
+        <Text style={[styles.subtitle, arRegular, { color: colors.textSecondary }]}>{t('admin.loginSub')}</Text>
 
         <TextInput
-          style={[styles.input, arRegular, { backgroundColor: colors.surfaceAlt, borderColor: colors.border, color: colors.textPrimary }]}
+          style={[styles.input, arRegular, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border, color: colors.textPrimary }]}
           placeholder={t('admin.identifier')}
-          placeholderTextColor="#829ab1"
+          placeholderTextColor="#9ca3af"
           value={identifier}
           onChangeText={setIdentifier}
         />
         <TextInput
-          style={[styles.input, arRegular, { backgroundColor: colors.surfaceAlt, borderColor: colors.border, color: colors.textPrimary }]}
+          style={[styles.input, arRegular, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border, color: colors.textPrimary }]}
           placeholder={t('admin.password')}
-          placeholderTextColor="#829ab1"
+          placeholderTextColor="#9ca3af"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]} onPress={submit} disabled={loading}>
+        <TouchableOpacity style={[styles.primaryBtn, loading && { opacity: 0.6 }]} onPress={submit} disabled={loading}>
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={[styles.primaryBtnText, arBold]}>{t('admin.loginButton')}</Text>}
         </TouchableOpacity>
       </View>
@@ -91,83 +88,66 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginHorizontal: s(16, 14, 20),
-      marginTop: s(12, 10, 16),
-      marginBottom: s(6, 4, 8),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
+      textAlign: 'center',
+      color: '#111827',
+      fontSize: s(17, 15, 20),
+      fontWeight: '700',
+    },
+    headerPlaceholder: {
+      width: s(40, 36, 44),
+    },
+    formWrap: {
+      paddingHorizontal: s(20, 16, 26),
+      paddingTop: s(32, 24, 40),
     },
     title: {
-      color: '#0a2540',
-      fontSize: s(17, 15, 20),
-      fontWeight: '900',
-      textAlign: 'center',
-      letterSpacing: -0.3,
+      fontSize: s(24, 20, 30),
+      fontWeight: '800',
+      marginBottom: s(4, 3, 6),
     },
-    placeholderBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
+    subtitle: {
+      fontSize: s(14, 12, 16),
+      lineHeight: s(20, 18, 24),
+      marginBottom: s(24, 20, 30),
     },
-    card: {
-      margin: s(16, 12, 22),
-      borderWidth: 1,
-      borderRadius: s(20, 16, 24),
-      padding: s(16, 12, 20),
-    },
-    cardTitle: { fontSize: s(22, 18, 28), fontWeight: '900' },
-    cardSub: { marginTop: s(6, 5, 8), marginBottom: s(14, 10, 16), fontSize: s(13, 11, 16), lineHeight: s(20, 17, 24) },
     input: {
+      backgroundColor: '#f9fafb',
       borderWidth: 1,
-      borderRadius: s(14, 12, 18),
-      minHeight: s(50, 44, 58),
+      borderColor: '#d1d5db',
+      borderRadius: 10,
+      height: 48,
       paddingHorizontal: s(14, 12, 18),
-      fontSize: s(15, 13, 18),
+      fontSize: s(15, 13, 17),
+      color: '#111827',
       marginBottom: s(10, 8, 12),
     },
     primaryBtn: {
-      minHeight: s(50, 44, 58),
-      borderRadius: s(14, 12, 18),
+      height: 48,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 4,
+      marginTop: s(6, 4, 8),
+      backgroundColor: '#2563eb',
     },
-    primaryBtnText: { color: '#fff', fontSize: s(15, 13, 18), fontWeight: '800' },
+    primaryBtnText: { color: '#fff', fontSize: s(15, 14, 17), fontWeight: '700' },
   });
 };

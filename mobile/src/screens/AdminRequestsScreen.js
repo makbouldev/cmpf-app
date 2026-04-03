@@ -9,11 +9,19 @@ import { fetchAdminRequests, updateAdminRequestStatus } from '../services/api';
 const TYPE_FILTERS = ['all', 'ambulance', 'doctor-home'];
 const STATUS_ACTIONS = ['pending', 'in-progress', 'completed', 'rejected'];
 
+const STATUS_COLORS = {
+  pending: '#f59e0b',
+  'in-progress': '#2563eb',
+  completed: '#059669',
+  rejected: '#dc2626',
+};
+
 export default function AdminRequestsScreen({ onBack, onNavigate, preferences, onUpdatePreferences }) {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(width), [width]);
   const { t, language } = useI18n();
-  const { colors } = useAppTheme();
+  const { colors, mode } = useAppTheme();
+  const isDark = mode === 'dark';
   const arRegular = language === 'ar' ? { fontFamily: 'Cairo_400Regular' } : null;
   const arBold = language === 'ar' ? { fontFamily: 'Cairo_700Bold' } : null;
 
@@ -83,13 +91,13 @@ export default function AdminRequestsScreen({ onBack, onNavigate, preferences, o
   if (!token) {
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-        <View style={[styles.emptyWrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.emptyCenter}>
           <Text style={[styles.emptyTitle, arBold, { color: colors.textPrimary }]}>{t('admin.notConnected')}</Text>
-          <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]} onPress={() => onNavigate('admin-login')}>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => onNavigate('admin-login')}>
             <Text style={[styles.primaryBtnText, arBold]}>{t('admin.loginButton')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.secondaryBtn, { borderColor: colors.border }]} onPress={onBack}>
-            <Text style={[styles.secondaryBtnText, arRegular, { color: colors.textSecondary }]}>{t('common.back')}</Text>
+          <TouchableOpacity style={[styles.outlineBtn, { borderColor: colors.border }]} onPress={onBack}>
+            <Text style={[styles.outlineBtnText, arRegular, { color: colors.textSecondary }]}>{t('common.back')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -98,18 +106,14 @@ export default function AdminRequestsScreen({ onBack, onNavigate, preferences, o
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={onBack}>
-            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.topTitleWrap}>
-            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{t('admin.requestsTitle')}</Text>
-          </View>
-          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} onPress={logout}>
-            <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.iconBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{t('admin.requestsTitle')}</Text>
+        <TouchableOpacity style={[styles.iconBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={logout}>
+          <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.filtersWrap}>
@@ -120,10 +124,10 @@ export default function AdminRequestsScreen({ onBack, onNavigate, preferences, o
           return (
             <TouchableOpacity
               key={item}
-              style={[styles.filterBtn, { borderColor: colors.border, backgroundColor: colors.surfaceAlt }, active && [styles.filterBtnActive, { borderColor: colors.primary }]]}
+              style={[styles.filterChip, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceAlt : '#f9fafb' }, active && { borderColor: '#2563eb', backgroundColor: isDark ? 'rgba(37,99,235,0.12)' : '#eff6ff' }]}
               onPress={() => setTypeFilter(item)}
             >
-              <Text style={[styles.filterText, arRegular, active && { color: colors.primary }]}>{label}</Text>
+              <Text style={[styles.filterText, arRegular, { color: active ? '#2563eb' : colors.textSecondary }]}>{label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -136,43 +140,54 @@ export default function AdminRequestsScreen({ onBack, onNavigate, preferences, o
       >
         {loading ? (
           <View style={styles.loaderWrap}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator size="large" color="#2563eb" />
           </View>
         ) : requests.length === 0 ? (
-          <View style={[styles.emptyWrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.emptyCenter}>
             <Text style={[styles.emptyTitle, arBold, { color: colors.textPrimary }]}>{t('admin.noRequests')}</Text>
           </View>
         ) : (
-          requests.map((item) => (
-            <View key={item.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={styles.cardTop}>
-                <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{item.type === 'ambulance' ? t('admin.filterAmbulance') : t('admin.filterDoctor')}</Text>
-                <Text style={[styles.statusPill, { backgroundColor: colors.surfaceAlt, color: colors.textPrimary }]}>{t(`admin.status_${item.status || 'pending'}`)}</Text>
-              </View>
-              <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.name || '-'}</Text>
-              <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.phone || '-'}</Text>
-              {item.fromLocation || item.toLocation ? (
-                <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>
-                  {`${t('admin.fromLabel')}: ${item.fromLocation || '-'}  |  ${t('admin.toLabel')}: ${item.toLocation || '-'} (${item.transferMode || 'same_city'})`}
-                </Text>
-              ) : null}
-              <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.address || '-'}</Text>
-              <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.notes || '-'}</Text>
+          requests.map((item) => {
+            const statusColor = STATUS_COLORS[item.status] || '#6b7280';
+            return (
+              <View key={item.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={styles.cardTop}>
+                  <Text style={[styles.cardType, arBold, { color: colors.textPrimary }]}>
+                    {item.type === 'ambulance' ? t('admin.filterAmbulance') : t('admin.filterDoctor')}
+                  </Text>
+                  <View style={styles.statusRow}>
+                    <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+                    <Text style={[styles.statusText, arRegular, { color: statusColor }]}>{t(`admin.status_${item.status || 'pending'}`)}</Text>
+                  </View>
+                </View>
+                <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.name || '-'}</Text>
+                <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.phone || '-'}</Text>
+                {item.fromLocation || item.toLocation ? (
+                  <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>
+                    {`${t('admin.fromLabel')}: ${item.fromLocation || '-'}  |  ${t('admin.toLabel')}: ${item.toLocation || '-'} (${item.transferMode || 'same_city'})`}
+                  </Text>
+                ) : null}
+                {item.address ? <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.address}</Text> : null}
+                {item.notes ? <Text style={[styles.cardLine, arRegular, { color: colors.textSecondary }]}>{item.notes}</Text> : null}
 
-              <View style={styles.actionsRow}>
-                {STATUS_ACTIONS.map((status) => (
-                  <TouchableOpacity
-                    key={status}
-                    style={[styles.actionBtn, { borderColor: colors.border, backgroundColor: colors.surfaceAlt }, item.status === status && [styles.actionBtnActive, { borderColor: colors.primary }]]}
-                    onPress={() => onChangeStatus(item.id, status)}
-                    disabled={updatingId === item.id}
-                  >
-                    <Text style={[styles.actionText, item.status === status && { color: colors.primary }]}>{t(`admin.status_${status}`)}</Text>
-                  </TouchableOpacity>
-                ))}
+                <View style={styles.actionsRow}>
+                  {STATUS_ACTIONS.map((status) => {
+                    const isActive = item.status === status;
+                    return (
+                      <TouchableOpacity
+                        key={status}
+                        style={[styles.actionChip, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceAlt : '#f9fafb' }, isActive && { borderColor: '#2563eb', backgroundColor: isDark ? 'rgba(37,99,235,0.12)' : '#eff6ff' }]}
+                        onPress={() => onChangeStatus(item.id, status)}
+                        disabled={updatingId === item.id}
+                      >
+                        <Text style={[styles.actionText, arRegular, { color: isActive ? '#2563eb' : colors.textSecondary }]}>{t(`admin.status_${status}`)}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
@@ -183,140 +198,122 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginHorizontal: s(16, 14, 20),
-      marginTop: s(12, 10, 16),
-      marginBottom: s(6, 4, 8),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     iconBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
-    },
-    topTitle: {
-      color: '#0a2540',
-      fontSize: s(17, 15, 20),
-      fontWeight: '900',
       textAlign: 'center',
-      letterSpacing: -0.3,
+      color: '#111827',
+      fontSize: s(17, 15, 20),
+      fontWeight: '700',
     },
     filtersWrap: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: s(8, 6, 10),
-      paddingHorizontal: s(16, 12, 22),
-      paddingTop: s(10, 8, 14),
+      paddingHorizontal: s(16, 14, 20),
+      paddingVertical: s(10, 8, 14),
     },
-    filterBtn: {
-      minHeight: s(38, 34, 44),
+    filterChip: {
+      height: s(36, 32, 40),
       borderWidth: 1,
-      borderRadius: s(12, 10, 16),
-      paddingHorizontal: s(12, 10, 14),
+      borderRadius: 10,
+      paddingHorizontal: s(14, 12, 18),
       alignItems: 'center',
       justifyContent: 'center',
     },
-    filterBtnActive: {
-      borderWidth: 2,
-      backgroundColor: '#eaf2ff',
-    },
-    filterText: { color: '#2f4f79', fontWeight: '700', fontSize: s(12, 10, 14) },
+    filterText: { fontWeight: '600', fontSize: s(13, 11, 15) },
     content: {
-      paddingHorizontal: s(16, 12, 22),
-      paddingVertical: s(12, 10, 16),
-      gap: s(10, 8, 12),
+      paddingHorizontal: s(16, 14, 20),
       paddingBottom: s(28, 20, 32),
-    },
-    loaderWrap: { minHeight: 220, alignItems: 'center', justifyContent: 'center' },
-    emptyWrap: {
-      margin: s(16, 12, 22),
-      borderWidth: 1,
-      borderRadius: s(18, 14, 22),
-      padding: s(16, 12, 20),
-      alignItems: 'center',
       gap: s(10, 8, 12),
     },
-    emptyTitle: { fontSize: s(18, 16, 22), fontWeight: '800' },
+    loaderWrap: { minHeight: 200, alignItems: 'center', justifyContent: 'center' },
+    emptyCenter: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: s(20, 16, 26),
+      paddingVertical: s(40, 32, 50),
+      gap: s(12, 10, 14),
+    },
+    emptyTitle: { fontSize: s(17, 15, 20), fontWeight: '700', textAlign: 'center' },
     card: {
       borderWidth: 1,
-      borderRadius: s(18, 14, 22),
-      padding: s(12, 10, 16),
+      borderRadius: 16,
+      padding: s(14, 12, 18),
     },
-    cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: s(6, 5, 8) },
-    cardTitle: { fontSize: s(16, 14, 20), fontWeight: '800' },
-    statusPill: {
-      paddingHorizontal: s(10, 8, 12),
-      paddingVertical: s(4, 4, 6),
-      borderRadius: 999,
-      fontWeight: '700',
-      fontSize: s(11, 10, 13),
-      overflow: 'hidden',
+    cardTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: s(8, 6, 10),
     },
-    cardLine: { fontSize: s(12, 10, 15), marginBottom: s(2, 2, 4) },
-    actionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: s(6, 5, 8), marginTop: s(10, 8, 12) },
-    actionBtn: {
-      minHeight: s(34, 30, 40),
+    cardType: { fontSize: s(15, 13, 18), fontWeight: '700' },
+    statusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    statusText: {
+      fontSize: s(12, 11, 14),
+      fontWeight: '600',
+    },
+    cardLine: { fontSize: s(13, 11, 15), marginBottom: s(2, 2, 4), lineHeight: s(18, 16, 22) },
+    actionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: s(6, 5, 8),
+      marginTop: s(10, 8, 12),
+    },
+    actionChip: {
+      height: s(32, 28, 36),
       borderWidth: 1,
-      borderRadius: s(10, 8, 12),
-      paddingHorizontal: s(10, 8, 12),
+      borderRadius: 8,
+      paddingHorizontal: s(10, 8, 14),
       alignItems: 'center',
       justifyContent: 'center',
     },
-    actionBtnActive: {
-      borderWidth: 2,
-      backgroundColor: '#eaf2ff',
-    },
-    actionText: { color: '#2f4f79', fontWeight: '700', fontSize: s(11, 10, 13) },
+    actionText: { fontWeight: '600', fontSize: s(12, 10, 14) },
     primaryBtn: {
-      minHeight: s(46, 40, 54),
-      borderRadius: s(12, 10, 16),
+      height: 48,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: s(18, 14, 24),
+      paddingHorizontal: s(24, 20, 30),
       width: '100%',
+      backgroundColor: '#2563eb',
     },
-    primaryBtnText: { color: '#fff', fontSize: s(14, 12, 17), fontWeight: '800' },
-    secondaryBtn: {
-      minHeight: s(44, 38, 50),
-      borderRadius: s(12, 10, 16),
+    primaryBtnText: { color: '#fff', fontSize: s(15, 13, 17), fontWeight: '700' },
+    outlineBtn: {
+      height: 48,
+      borderRadius: 12,
       borderWidth: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: s(18, 14, 24),
+      paddingHorizontal: s(24, 20, 30),
       width: '100%',
     },
-    secondaryBtnText: { fontSize: s(13, 11, 16), fontWeight: '700' },
+    outlineBtnText: { fontSize: s(14, 12, 16), fontWeight: '600' },
   });
 };

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import {
   SafeAreaView,
@@ -16,11 +15,9 @@ import { createScaler } from '../utils/responsive';
 
 function InfoRow({ icon, label, value, styles, colors, arRegular, arBold }) {
   return (
-    <View style={[styles.infoRow, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
-      <View style={[styles.infoIconWrap, { backgroundColor: 'rgba(59,130,246,0.14)' }]}>
-        <Ionicons name={icon} size={18} color={colors.primary} />
-      </View>
-      <View style={{ flex: 1 }}>
+    <View style={[styles.infoRow, { borderColor: colors.border }]}>
+      <Ionicons name={icon} size={18} color="#6b7280" />
+      <View style={styles.infoTextWrap}>
         <Text style={[styles.infoLabel, arRegular, { color: colors.textSecondary }]}>{label}</Text>
         <Text style={[styles.infoValue, arBold, { color: colors.textPrimary }]}>{value}</Text>
       </View>
@@ -63,94 +60,44 @@ export default function ProfileScreen({ onNavigate, onBack, preferences, onUpdat
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.headerCard, isDark && { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]} 
-            onPress={onBack}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.topTitleWrap}>
-            <Text style={[styles.topTitle, arBold, { color: colors.textPrimary }]}>{t('profile.title')}</Text>
-          </View>
-          <View style={styles.placeholderBtn} />
-        </View>
+      <View style={[styles.header, isDark && { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity style={[styles.backBtn, isDark && { backgroundColor: colors.surfaceAlt }]} onPress={onBack} activeOpacity={0.8}>
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, arBold, { color: colors.textPrimary }]}>{t('profile.title')}</Text>
+        <View style={styles.headerPlaceholder} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={isDark ? ['#14213d', '#1d4ed8'] : ['#0a2540', '#0066ff']}
-          style={styles.profileHero}
-        >
-          <View style={styles.avatarWrap}>
-            <View style={styles.avatarCircle}>
-              <Ionicons name="person" size={46} color="#ffffff" />
-            </View>
-            <Text style={[styles.nameText, arBold]}>{displayName}</Text>
-            <Text style={[styles.modeText, arRegular]}>{accountMode}</Text>
+        <View style={styles.avatarSection}>
+          <View style={[styles.avatarCircle, isDark && { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
+            <Ionicons name="person" size={36} color={isDark ? colors.textSecondary : '#9ca3af'} />
           </View>
-        </LinearGradient>
+          <Text style={[styles.nameText, arBold, { color: colors.textPrimary }]}>{displayName}</Text>
+          <Text style={[styles.modeText, arRegular, { color: colors.textSecondary }]}>{accountMode}</Text>
+        </View>
 
+        <Text style={[styles.sectionLabel, arBold, { color: colors.textSecondary }]}>{t('profile.personalInfo')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('profile.personalInfo')}</Text>
-          <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('profile.personalInfoSub')}</Text>
-
-          <InfoRow
-            icon="call-outline"
-            label={t('profile.phone')}
-            value={displayPhone}
-            styles={styles}
-            colors={colors}
-            arRegular={arRegular}
-            arBold={arBold}
-          />
-          <InfoRow
-            icon="calendar-outline"
-            label={t('profile.age')}
-            value={displayAge}
-            styles={styles}
-            colors={colors}
-            arRegular={arRegular}
-            arBold={arBold}
-          />
-          <InfoRow
-            icon="transgender-outline"
-            label={t('profile.gender')}
-            value={displayGender}
-            styles={styles}
-            colors={colors}
-            arRegular={arRegular}
-            arBold={arBold}
-          />
+          <InfoRow icon="call-outline" label={t('profile.phone')} value={displayPhone} styles={styles} colors={colors} arRegular={arRegular} arBold={arBold} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <InfoRow icon="calendar-outline" label={t('profile.age')} value={displayAge} styles={styles} colors={colors} arRegular={arRegular} arBold={arBold} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <InfoRow icon="transgender-outline" label={t('profile.gender')} value={displayGender} styles={styles} colors={colors} arRegular={arRegular} arBold={arBold} />
         </View>
 
         {isGuest ? (
-          <View style={[styles.card, { marginTop: styles.s16 || 16, backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, arBold, { color: colors.textPrimary }]}>{t('profile.authRequiredTitle') || 'Connexion'}</Text>
-            <Text style={[styles.cardSub, arRegular, { color: colors.textSecondary }]}>{t('profile.authRequiredSub') || 'Connectez-vous pour voir votre profil'}</Text>
-            
-            <TouchableOpacity 
-              style={[styles.primaryBtn, { backgroundColor: colors.primary }]} 
-              onPress={() => onNavigate('login')}
-            >
+          <View style={styles.authSection}>
+            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: '#2563eb' }]} onPress={() => onNavigate('login')}>
               <Text style={[styles.primaryBtnText, arBold]}>{t('onboarding.signIn')}</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.secondaryBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} 
-              onPress={() => onNavigate('signup')}
-            >
-              <Text style={[styles.secondaryBtnText, arRegular, { color: colors.textPrimary }]}>{t('onboarding.signUp')}</Text>
+            <TouchableOpacity style={[styles.outlineBtn, { borderColor: colors.border }]} onPress={() => onNavigate('signup')}>
+              <Text style={[styles.outlineBtnText, arRegular, { color: colors.textPrimary }]}>{t('onboarding.signUp')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity 
-            style={[styles.logoutBtn, { borderColor: '#ef4444' }]} 
-            onPress={handleLogout}
-          >
-            <Ionicons name="log-out-outline" size={20} color="#ef4444" style={{ marginRight: 8 }} />
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={18} color="#dc2626" />
             <Text style={[styles.logoutText, arBold]}>Déconnexion</Text>
           </TouchableOpacity>
         )}
@@ -163,176 +110,130 @@ const createStyles = (width) => {
   const s = createScaler(width);
   return StyleSheet.create({
     screen: { flex: 1 },
-    headerCard: {
+    header: {
       backgroundColor: '#ffffff',
-      borderRadius: s(24, 20, 28),
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
       paddingHorizontal: s(16, 14, 20),
-      paddingVertical: s(14, 12, 18),
-      marginHorizontal: s(16, 14, 20),
-      marginTop: s(12, 10, 16),
-      marginBottom: s(6, 4, 8),
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    topBar: {
+      paddingVertical: s(12, 10, 16),
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: s(12, 10, 16),
     },
     backBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
-      borderRadius: 999,
+      width: s(40, 36, 44),
+      height: s(40, 36, 44),
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f1f5f9',
-      borderWidth: 1,
-      borderColor: '#e2e8f0',
-      shadowColor: '#0f172a',
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      backgroundColor: '#f3f4f6',
     },
-    topTitleWrap: {
+    headerTitle: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: s(8, 6, 12),
-    },
-    topTitle: {
-      color: '#0a2540',
-      fontSize: s(17, 15, 20),
-      fontWeight: '900',
       textAlign: 'center',
-      letterSpacing: -0.3,
+      color: '#111827',
+      fontSize: s(17, 15, 20),
+      fontWeight: '700',
     },
-    placeholderBtn: {
-      width: s(44, 38, 48),
-      height: s(44, 38, 48),
+    headerPlaceholder: {
+      width: s(40, 36, 44),
     },
-    profileHero: {
-      borderRadius: s(24, 20, 28),
-      paddingVertical: s(24, 20, 30),
-      paddingHorizontal: s(16, 14, 22),
+    content: {
+      paddingHorizontal: s(16, 14, 20),
+      paddingTop: s(24, 20, 30),
+      paddingBottom: s(32, 24, 40),
+    },
+    avatarSection: {
       alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: s(14, 12, 18),
-      shadowColor: '#0a2540',
-      shadowOpacity: 0.15,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
-    },
-    avatarWrap: {
-      marginTop: s(18, 14, 24),
-      alignItems: 'center',
-      justifyContent: 'center',
+      marginBottom: s(24, 20, 30),
     },
     avatarCircle: {
-      width: s(92, 76, 110),
-      height: s(92, 76, 110),
+      width: s(80, 68, 92),
+      height: s(80, 68, 92),
       borderRadius: 999,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(255,255,255,0.24)',
-      borderWidth: 2,
-      borderColor: 'rgba(255,255,255,0.54)',
+      backgroundColor: '#f3f4f6',
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
     },
     nameText: {
-      marginTop: s(10, 8, 14),
-      color: '#fff',
-      fontSize: s(24, 20, 30),
-      fontWeight: '900',
+      marginTop: s(12, 10, 16),
+      color: '#111827',
+      fontSize: s(22, 18, 26),
+      fontWeight: '700',
       textAlign: 'center',
     },
     modeText: {
-      marginTop: s(4, 4, 8),
-      color: 'rgba(255,255,255,0.92)',
-      fontSize: s(13, 11, 16),
-      fontWeight: '700',
+      marginTop: s(4, 3, 6),
+      color: '#6b7280',
+      fontSize: s(14, 12, 16),
       textAlign: 'center',
     },
-    content: {
-      paddingHorizontal: s(16, 14, 22),
-      paddingTop: s(16, 14, 22),
-      paddingBottom: s(28, 22, 34),
+    sectionLabel: {
+      fontSize: s(12, 11, 13),
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: s(8, 6, 10),
+      marginLeft: s(4, 2, 6),
     },
     card: {
-      borderRadius: s(24, 20, 30),
+      borderRadius: 16,
       borderWidth: 1,
-      padding: s(16, 14, 22),
-    },
-    cardTitle: {
-      fontSize: s(22, 19, 28),
-      fontWeight: '900',
-    },
-    cardSub: {
-      marginTop: s(6, 6, 10),
-      marginBottom: s(14, 10, 16),
-      fontSize: s(13, 11, 16),
-      lineHeight: s(20, 17, 23),
+      overflow: 'hidden',
     },
     infoRow: {
-      minHeight: s(64, 56, 74),
-      borderRadius: s(16, 14, 20),
-      borderWidth: 1,
-      paddingHorizontal: s(12, 10, 16),
-      marginBottom: s(10, 8, 12),
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s(10, 8, 12),
+      paddingHorizontal: s(16, 14, 20),
+      paddingVertical: s(14, 12, 16),
+      gap: s(12, 10, 14),
     },
-    infoIconWrap: {
-      width: s(38, 34, 44),
-      height: s(38, 34, 44),
-      borderRadius: 999,
-      alignItems: 'center',
-      justifyContent: 'center',
+    infoTextWrap: {
+      flex: 1,
     },
     infoLabel: {
-      fontSize: s(12, 10, 14),
-      fontWeight: '700',
+      fontSize: s(12, 11, 13),
+      fontWeight: '500',
     },
     infoValue: {
-      marginTop: s(3, 2, 5),
-      fontSize: s(16, 14, 20),
-      fontWeight: '800',
+      marginTop: 2,
+      fontSize: s(15, 13, 17),
+      fontWeight: '600',
     },
-    s16: s(16, 14, 20),
+    divider: {
+      height: 1,
+      marginLeft: s(46, 40, 52),
+    },
+    authSection: {
+      marginTop: s(24, 20, 30),
+      gap: s(10, 8, 12),
+    },
     primaryBtn: {
-      height: s(50, 44, 58),
-      borderRadius: s(14, 12, 18),
+      height: 48,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: s(10, 8, 14),
     },
-    primaryBtnText: { color: '#fff', fontSize: s(16, 14, 18), fontWeight: '800' },
-    secondaryBtn: {
-      height: s(50, 44, 58),
-      borderRadius: s(14, 12, 18),
+    primaryBtnText: { color: '#fff', fontSize: s(15, 14, 17), fontWeight: '700' },
+    outlineBtn: {
+      height: 48,
+      borderRadius: 12,
       borderWidth: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: s(10, 8, 14),
     },
-    secondaryBtnText: { fontSize: s(16, 14, 18), fontWeight: '700' },
+    outlineBtnText: { fontSize: s(15, 14, 17), fontWeight: '600' },
     logoutBtn: {
       flexDirection: 'row',
-      height: s(54, 48, 62),
-      borderRadius: s(16, 14, 20),
-      borderWidth: 1,
+      height: 48,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: s(24, 20, 30),
       backgroundColor: '#fef2f2',
+      gap: s(8, 6, 10),
     },
-    logoutText: { color: '#ef4444', fontSize: s(16, 14, 18), fontWeight: '800' },
+    logoutText: { color: '#dc2626', fontSize: s(15, 14, 17), fontWeight: '700' },
   });
 };
