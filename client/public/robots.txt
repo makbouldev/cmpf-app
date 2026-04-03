@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://cmpfambulance.ma/sitemap.xml
